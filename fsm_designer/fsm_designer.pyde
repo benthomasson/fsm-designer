@@ -1,5 +1,23 @@
 
 
+from fsm import State, transition, to_yaml
+
+import sys
+
+class Other(State):
+
+    pass
+
+
+class Ready(State):
+
+    @transition(Other)
+    def on_hello(self):
+        pass
+
+
+print to_yaml(sys.modules[__name__])
+
 pg = None
 panX = 50
 panY = 50
@@ -11,35 +29,40 @@ mousePressedY = 0
 
 def setup():
     global pg
-    size(200, 200, FX2D);
-    smooth(4)
-    #pg = createGraphics(100, 100);
+    size(1024, 768, JAVA2D)
+    noCursor()
+
 
 
 def draw():
     global mousePX, mousePY, panX, panY
     mousePX = mouseX/scaleX - panX
     mousePY = mouseY/scaleY - panY
-    #pg.beginDraw()
     background(102)
     stroke(255)
     strokeWeight(1)
     translate(panX, panY)
     line(width*0.5, height*0.5, mousePX, mousePY)
-    #pg.endDraw()
-    #scale(scaleX, scaleY)
-    #image(pg, panX, panY);
+
     
     
 def mousePressed():
-    global mousePressedX, mousePressedY
-    mousePressedX = mousePX
-    mousePressedY = mousePY
-    print mousePressedX, mousePressedY
+    if mouseButton == RIGHT or keyCode == CONTROL:
+        cursor(HAND)
+        global mousePressedX, mousePressedY
+        mousePressedX = mousePX
+        mousePressedY = mousePY
+        print mousePressedX, mousePressedY
     
     
 def mouseDragged():
-    global mousePressedX, mousePressedY, panX, panY
-    panX = panX + (mousePX - mousePressedX)
-    panY = panY + (mousePY - mousePressedY)
-    print panX, panY
+    if mouseButton == RIGHT or keyCode == CONTROL:
+        cursor(HAND)
+        global mousePressedX, mousePressedY, panX, panY
+        panX = panX + (mousePX - mousePressedX)
+        panY = panY + (mousePY - mousePressedY)
+        print panX, panY
+        
+        
+def mouseReleased():
+    cursor(ARROW)    
