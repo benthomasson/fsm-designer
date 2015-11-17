@@ -29,7 +29,7 @@ mousePressedY = 0
 
 def setup():
     global pg
-    size(1024, 768, JAVA2D)
+    size(1024, 768, FX2D)
     noCursor()
 
 
