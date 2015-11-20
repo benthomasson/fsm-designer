@@ -5,6 +5,7 @@ from fsm import State, transition, to_yaml, singleton
 import sys
 
 states = []
+transitions = []
 page_width = 1024
 page_height = 768
 panX = 0
@@ -58,6 +59,16 @@ class Other(BaseState):
     pass
 
 
+def select_state():
+    application.selected_state = None
+    for state in states:
+        if state.is_selected() and application.selected_state is None:
+            state.selected = True
+            application.selected_state = state
+        else:
+            state.selected = False
+
+
 @singleton
 class Ready(BaseState):
 
@@ -69,14 +80,7 @@ class Ready(BaseState):
             application.changeState(MenuWheel)
 
         elif mouseButton == LEFT:
-            application.selected_state = None
-            for state in states:
-                if state.is_selected() and application.selected_state is None:
-                    state.selected = True
-                    application.selected_state = state
-                else:
-                    state.selected = False
-
+            select_state()
             if application.selected_state is None:
                 application.changeState(ScaleAndPan)
             else:
@@ -93,18 +97,69 @@ class Selected(BaseState):
     @transition('MenuWheel')
     @transition('Edit')
     @transition('Ready')
+    @transition('Move')
     def mousePressed(self):
         if mouseButton == RIGHT:
-            application.selected_state.selected = False
-            application.selected_state = None
-            application.changeState(MenuWheel)
-        elif mouseButton == LEFT:
             if application.selected_state.is_selected():
                 application.changeState(Edit)
             else:
                 application.selected_state.selected = False
                 application.selected_state = None
+                application.changeState(MenuWheel)
+        elif mouseButton == LEFT:
+            if application.selected_state.is_selected():
+                application.changeState(Move)
+            else:
                 application.changeState(Ready)
+                application.state.mousePressed()
+
+    @transition('Move')
+    @transition('NewTransition')
+    def mouseDragged(self):
+        if mouseButton == LEFT:
+            application.changeState(Move)
+            application.state.mouseDragged()
+        if mouseButton == RIGHT:
+            application.changeState(NewTransition)
+            application.state.mouseDragged()
+
+
+@singleton
+class NewTransition(BaseState):
+
+    def start(self):
+        new_transition = FSMTransition(from_state=application.selected_state)
+        transitions.append(new_transition)
+        application.selected_transition = new_transition
+
+    def end(self):
+        if application.selected_transition is not None and application.selected_transition.to_state is None:
+            transitions.remove(application.selected_transition)
+        application.selected_transition = None
+
+    @transition('Selected')
+    def mouseReleased(self):
+        for state in states:
+            if state.is_selected():
+                application.selected_transition.to_state = state
+                print "found state ", state
+                break
+        application.changeState(Selected)
+
+
+@singleton
+class Move(BaseState):
+
+    def start(self):
+        global mousePressedX, mousePressedY
+
+    def mouseDragged(self):
+        application.selected_state.x = mousePX
+        application.selected_state.y = mousePY
+
+    @transition('Selected')
+    def mouseReleased(self):
+        application.changeState(Selected)
 
 
 @singleton
@@ -116,19 +171,37 @@ class Edit(BaseState):
     def end(self):
         application.selected_state.edit = False
 
+    @transition('NewTransition')
+    def mouseDragged(self):
+        if mouseButton == RIGHT:
+            application.changeState(NewTransition)
+            application.state.mouseDragged()
+
+    @transition('Selected')
+    @transition('Ready')
+    def mousePressed(self):
+        if application.selected_state.is_selected():
+            application.changeState(Selected)
+            application.state.mousePressed()
+        else:
+            application.changeState(Ready)
+            application.state.mousePressed()
 
     @transition('Selected')
     def keyTyped(self):
-        if key == RETURN:
-            application.changeState(Selected)
-        elif key == ENTER:
-            application.changeState(Selected)
-        elif key == BACKSPACE:
-            application.selected_state.label = application.selected_state.label[:-1]
-        elif key == DELETE:
-            application.selected_state.label = application.selected_state.label[:-1]
+        if key == CODED:
+            pass
         else:
-            application.selected_state.label += key
+            if key == RETURN:
+                application.changeState(Selected)
+            elif key == ENTER:
+                application.changeState(Selected)
+            elif key == BACKSPACE:
+                application.selected_state.label = application.selected_state.label[:-1]
+            elif key == DELETE:
+                application.selected_state.label = application.selected_state.label[:-1]
+            else:
+                application.selected_state.label += key
 
 
 @singleton
@@ -233,15 +306,33 @@ class FSMState(object):
         return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
 
 
+def arrow(x1, y1, x2, y2, arrow_offset):
+    line(x1, y1, x2, y2)
+    line(x2, y2, x2, y2)
+    pushMatrix()
+    translate(x2, y2)
+    rotate(atan2(y2-y1, x2-x1))
+    translate(-arrow_offset, 0)
+    triangle(0, 0, -10, 5, -10, -5)
+    popMatrix()
+
+
 class FSMTransition(object):
 
     def __init__(self, **kwargs):
         self.from_state = None
         self.to_state = None
         self.label = None
+        self.__dict__.update(kwargs)
 
     def draw(self):
-        pass
+        strokeWeight(2)
+        stroke(0)
+        fill(0)
+        if self.from_state is not None and self.to_state is None:
+            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0)
+        if self.from_state is not None and self.to_state is not None:
+            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2)
 
 
 class Wheel(object):
@@ -282,6 +373,7 @@ class Application(object):
         self.state = Ready
         self.wheel = None
         self.selected_state = None
+        self.selected_transition = None
 
     def changeState(self, state):
         if self.state:
@@ -347,6 +439,8 @@ def draw():
     application.draw()
     scale(scaleXY)
     translate(panX, panY)
+    for t in transitions:
+        t.draw()
     for state in states:
         state.draw()
 
