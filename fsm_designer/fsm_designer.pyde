@@ -21,6 +21,8 @@ mousePressedX = mousePressedY = 0
 TEXT_SIZE = 12
 application = None
 
+SELECTED_COLOR = "#66FFFF"
+
 
 class BaseState(State):
 
@@ -61,7 +63,7 @@ class Other(BaseState):
     pass
 
 
-def select_state():
+def select_item():
     application.selected_state = None
     for state in states:
         if state.is_selected() and application.selected_state is None:
@@ -69,6 +71,10 @@ def select_state():
             application.selected_state = state
         else:
             state.selected = False
+    for t in transitions:
+        if t.is_selected() and application.selected_transition is None:
+            t.selected = True
+            application.selected_transition = t
 
 
 @singleton
@@ -82,7 +88,7 @@ class Ready(BaseState):
             application.changeState(MenuWheel)
 
         elif mouseButton == LEFT:
-            select_state()
+            select_item()
             if application.selected_state is None:
                 application.changeState(ScaleAndPan)
             else:
@@ -136,14 +142,16 @@ class Selected(BaseState):
 class NewTransition(BaseState):
 
     def start(self):
-        new_transition = FSMTransition(from_state=application.selected_state)
+        new_transition = FSMTransition(from_state=application.selected_state, selected=True)
         transitions.append(new_transition)
         application.selected_transition = new_transition
 
     def end(self):
         if application.selected_transition is not None and application.selected_transition.to_state is None:
             transitions.remove(application.selected_transition)
+        application.selected_transition.selected = False
         application.selected_transition = None
+
 
     @transition('Selected')
     def mouseReleased(self):
@@ -309,7 +317,7 @@ class FSMState(object):
         if self.selected:
             strokeWeight(2)
             noFill()
-            stroke("#66FFFF")
+            stroke(SELECTED_COLOR)
             ellipse(self.x, self.y, self.size+6, self.size+6)
         fill(0)
         if self.edit:
@@ -321,14 +329,31 @@ class FSMState(object):
         return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
 
 
-def arrow(x1, y1, x2, y2, arrow_offset, label=""):
+def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False):
+    if selected:
+        strokeWeight(6)
+        stroke(SELECTED_COLOR)
+        fill(0)
+        line(x1, y1, x2, y2)
+        pushMatrix()
+        translate(x2, y2)
+        rotate(atan2(y2-y1, x2-x1))
+        translate(-arrow_offset, 0)
+        stroke(SELECTED_COLOR)
+        fill(SELECTED_COLOR)
+        triangle(4, 0, -12, 7, -12, -7)
+        popMatrix()
+    strokeWeight(2)
+    stroke(0)
+    fill(0)
     line(x1, y1, x2, y2)
-    line(x2, y2, x2, y2)
     pushMatrix()
     translate(x2, y2)
     rotate(atan2(y2-y1, x2-x1))
     pushMatrix()
     translate(-arrow_offset, 0)
+    stroke(0)
+    fill(0)
     triangle(0, 0, -10, 5, -10, -5)
     popMatrix()
     translate(-sqrt((y2-y1)**2 + (x2-x1)**2)/2.0, 0)
@@ -344,16 +369,17 @@ class FSMTransition(object):
         self.from_state = None
         self.to_state = None
         self.label = "foobar"
+        self.selected = False
         self.__dict__.update(kwargs)
+    
+    def is_selected(self):
+        return False
 
     def draw(self):
-        strokeWeight(2)
-        stroke(0)
-        fill(0)
         if self.from_state is not None and self.to_state is None:
-            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0, self.label)
+            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0, self.label, self.selected)
         if self.from_state is not None and self.to_state is not None:
-            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2, self.label)
+            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2, self.label, self.selected)
 
 
 class Wheel(object):
@@ -408,35 +434,35 @@ class Application(object):
         textSize(TEXT_SIZE)
         xy_t = "xy_t: {0}, {1}".format(mouseX, mouseY)
         text(xy_t,
-             page_width - 100 - textWidth(xy_t),
-             page_height - 150)
+             width - 100 - textWidth(xy_t),
+             height - 150)
         xyp_t = "xyp_t: {0}, {1}".format(mousePX, mousePY)
         text(xyp_t,
-             page_width - 100 - textWidth(xyp_t),
-             page_height - 130)
+             width - 100 - textWidth(xyp_t),
+             height - 130)
         text(self.state.name(),
-             page_width - 100 - textWidth(self.state.name()),
-             page_height - 110)
+             width - 100 - textWidth(self.state.name()),
+             height - 110)
         fps = "fps: {0}".format(int(frameRate))
         text(fps,
-             page_width - 100 - textWidth(fps),
-             page_height - 50)
+             width - 100 - textWidth(fps),
+             height - 50)
         pan = "pan: {0}, {1}".format(int(panX), int(panY))
         text(pan,
-             page_width - 100 - textWidth(pan),
-             page_height - 30)
+             width - 100 - textWidth(pan),
+             height - 30)
         scaleXYT = "scale: {0}".format(scaleXY)
         text(scaleXYT,
-             page_width - 100 - textWidth(scaleXYT),
-             page_height - 10)
+             width - 100 - textWidth(scaleXYT),
+             height - 10)
         key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
         text(key_t,
-             page_width - 100 - textWidth(key_t),
-             page_height - 70)
+             width - 100 - textWidth(key_t),
+             height - 70)
         mouseButton_t = "mouseButton: {0}".format(mouseButton)
         text(mouseButton_t,
-             page_width - 100 - textWidth(mouseButton_t),
-             page_height - 90)
+             width - 100 - textWidth(mouseButton_t),
+             height - 90)
 
         if self.wheel:
             self.wheel.draw()
@@ -449,6 +475,8 @@ def setup():
     global application
     size(page_width, page_height, FX2D)
     application = Application()
+    frame.setTitle("FSM Designer")
+    frame.setResizable(True)
     frameRate(30)
 
 
