@@ -71,10 +71,13 @@ def select_item():
             application.selected_state = state
         else:
             state.selected = False
+    application.selected_transition = None
     for t in transitions:
-        if t.is_selected() and application.selected_transition is None:
+        if t.is_selected() and application.selected_transition is None and application.selected_state is None:
             t.selected = True
             application.selected_transition = t
+        else:
+            t.selected = False
 
 
 @singleton
@@ -83,20 +86,93 @@ class Ready(BaseState):
     @transition('MenuWheel')
     @transition('ScaleAndPan')
     @transition('Selected')
+    @transition('SelectedTransition')
     def mousePressed(self):
         if mouseButton == RIGHT:
             application.changeState(MenuWheel)
 
         elif mouseButton == LEFT:
             select_item()
-            if application.selected_state is None:
-                application.changeState(ScaleAndPan)
-            else:
+            if application.selected_state is not None:
                 application.changeState(Selected)
+            elif application.selected_transition is not None:
+                application.changeState(SelectedTransition)
+            else:
+                application.changeState(ScaleAndPan)
 
     def keyPressed(self):
         global lastKeyCode
         lastKeyCode = keyCode
+
+
+@singleton
+class SelectedTransition(BaseState):
+
+    @transition('EditTransition')
+    @transition('MenuWheel')
+    @transition('Ready')
+    def mousePressed(self):
+        if mouseButton == RIGHT:
+            if application.selected_transition.is_selected():
+                application.changeState(EditTransition)
+            else:
+                application.selected_transition.selected = False
+                application.selected_transition = None
+                application.changeState(MenuWheel)
+        elif mouseButton == LEFT:
+            if application.selected_transition.is_selected():
+                pass
+            else:
+                application.changeState(Ready)
+                application.state.mousePressed()
+
+    def keyReleased(self):
+        if keyCode == 8:
+            application.selected_transition.selected = False
+            transitions.remove(application.selected_transition)
+            application.changeState(Ready)
+
+
+@singleton
+class EditTransition(BaseState):
+
+    def start(self):
+        application.selected_transition.edit = True
+
+    def end(self):
+        application.selected_transition.edit = False
+
+    @transition('SelectedTransition')
+    @transition('Ready')
+    def mousePressed(self):
+        if application.selected_transition.is_selected():
+            application.changeState(SelectedTransition)
+            application.state.mousePressed()
+        else:
+            application.changeState(Ready)
+            application.state.mousePressed()
+
+    def keyReleased(self):
+        if keyCode == 8:
+            application.selected_transition.label = application.selected_transition.label[:-1]
+
+    @transition('SelectedTransition')
+    def keyTyped(self):
+        print key, keyCode
+        if key == CODED:
+            if keyCode == 8:
+                application.selected_transition.label = application.selected_transition.label[:-1]
+        else:
+            if key == RETURN:
+                application.changeState(SelectedTransition)
+            elif key == ENTER:
+                application.changeState(SelectedTransition)
+            elif key == BACKSPACE:
+                application.selected_transition.label = application.selected_transition.label[:-1]
+            elif key == DELETE:
+                application.selected_transition.label = application.selected_transition.label[:-1]
+            else:
+                application.selected_transition.label += key
 
 
 @singleton
@@ -151,7 +227,6 @@ class NewTransition(BaseState):
             transitions.remove(application.selected_transition)
         application.selected_transition.selected = False
         application.selected_transition = None
-
 
     @transition('Selected')
     def mouseReleased(self):
@@ -368,18 +443,55 @@ class FSMTransition(object):
     def __init__(self, **kwargs):
         self.from_state = None
         self.to_state = None
-        self.label = "foobar"
+        self.label = ""
         self.selected = False
+        self.edit = False
         self.__dict__.update(kwargs)
-    
+
     def is_selected(self):
-        return False
+        x1 = self.from_state.x
+        y1 = self.from_state.y
+        x2 = self.to_state.x
+        y2 = self.to_state.y
+        x = mousePX
+        y = mousePY
+
+        dx = x2 - x1
+        dy = y2 - y1
+
+        d = sqrt(dx*dx + dy*dy)
+
+        ca = dx/d
+        sa = dy/d
+
+        mX = (-x1+x)*ca + (-y1+y)*sa
+
+        if mX <= 0:
+            result_x = x1
+            result_y = y1
+        elif mX >= d:
+            result_x = x2
+            result_y = y2
+        else:
+            result_x = x1 + mX*ca
+            result_y = y1 + mX*sa
+
+        dx = x - result_x
+        dy = y - result_y
+        distance = sqrt(dx*dx + dy*dy)
+        if distance < 10:
+            return True
+        else:
+            return False
 
     def draw(self):
+        label = self.label
+        if self.edit:
+            label = self.label + "_"
         if self.from_state is not None and self.to_state is None:
-            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0, self.label, self.selected)
+            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0, label, self.selected)
         if self.from_state is not None and self.to_state is not None:
-            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2, self.label, self.selected)
+            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2, label, self.selected)
 
 
 class Wheel(object):
@@ -455,7 +567,11 @@ class Application(object):
         text(scaleXYT,
              width - 100 - textWidth(scaleXYT),
              height - 10)
-        key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
+        try:
+            key_t = ""
+            key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
+        except Exception:
+            pass
         text(key_t,
              width - 100 - textWidth(key_t),
              height - 70)
