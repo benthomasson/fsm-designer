@@ -700,13 +700,15 @@ def draw():
     mousePX = mouseX / scaleXY - panX
     mousePY = mouseY / scaleXY - panY
     background(102)
-    application.draw()
+    pushMatrix()
     scale(scaleXY)
     translate(panX, panY)
     for t in transitions:
         t.draw()
     for state in states:
         state.draw()
+    popMatrix()
+    application.draw()
 
 
 def mousePressed():
