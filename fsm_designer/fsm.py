@@ -27,10 +27,10 @@ class State(object):
     pass
 
 
-
 def to_yaml(module=None):
     states = []
-    app = dict(name=module.__name__, states=states)
+    transitions = []
+    app = dict(name=module.__name__, states=states, transitions=transitions)
     for key in dir(module):
         value = getattr(module, key)
         if isinstance(value, State):
@@ -39,16 +39,10 @@ def to_yaml(module=None):
             state_class = value
         else:
             continue
-        transitions = []
-        state = dict(name=state_class.__name__, transitions=transitions)
+        state = dict(label=state_class.__name__)
         states.append(state)
         for name, fn in inspect.getmembers(state_class):
             if hasattr(fn, 'state_transitions'):
                 for destination in getattr(fn, 'state_transitions'):
-                    transitions.append(dict(function=name, destination=destination))
+                    transitions.append(dict(label=name, from_state=state_class.__name__, to_state=destination))
     return yaml.dump(app, default_flow_style=False)
-
-
-
-
-

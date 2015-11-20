@@ -8,6 +8,7 @@ import os
 import sys
 import traceback
 import itertools
+import random
 
 from math import sqrt, pi
 
@@ -63,11 +64,6 @@ class BaseState(State):
     def fileSelected(self, selected):
         pass
 
-
-@singleton
-class Other(BaseState):
-
-    pass
 
 
 def select_item():
@@ -351,6 +347,7 @@ class Load(BaseState):
     def start(self):
         selectInput("Input file", "fileSelected")
 
+    @transition('Ready')
     def fileSelected(self, selection):
         global states, transitions, panX, panY, scaleXY
         try:
@@ -362,11 +359,12 @@ class Load(BaseState):
                     d = yaml.load(f.read())
                     print d
                 for state_d in d.get('states', []):
-                    state = FSMState(label=state_d.get('label'),
-                                     x=state_d.get('x', 0),
-                                     y=state_d.get('y', 0),
+                    label = state_d.get('label') or "S{0}".format(next(state_sequence))
+                    state = FSMState(label=label,
+                                     x=state_d.get('x', random.randrange(panX, width*scaleXY + panX)),
+                                     y=state_d.get('y', random.randrange(panY, height*scaleXY + panY)),
                                      color=state_d.get('color', 255),
-                                     size=state_d.get('size', 100))
+                                     size=state_d.get('size', max(100, textWidth(label) + 20)))
                     new_states.append(state)
                 for transition_d in d.get('transitions', []):
                     from_state = [s for s in new_states if s.label == transition_d['from_state']]
@@ -436,6 +434,9 @@ class MenuWheel(BaseState):
         application.wheel = None
 
     @transition(Ready)
+    @transition('Save')
+    @transition('Load')
+    @transition('NewState')
     def mouseReleased(self):
         menu_selection = application.wheel.get_menu_selection()
         if menu_selection == "New":
@@ -551,6 +552,9 @@ class FSMTransition(object):
         dy = y2 - y1
 
         d = sqrt(dx*dx + dy*dy)
+
+        if d == 0:
+            return False
 
         ca = dx/d
         sa = dy/d
@@ -675,7 +679,11 @@ class Application(object):
             self.wheel.draw()
 
 
-print to_yaml(sys.modules[__name__])
+with open("self.yml", 'w') as f:
+    self_yml = to_yaml(sys.modules[__name__])
+    print self_yml
+    f.write(self_yml)
+
 
 
 def setup():
