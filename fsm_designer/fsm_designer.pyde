@@ -4,6 +4,8 @@ from fsm import State, transition, to_yaml, singleton
 
 import sys
 
+from math import sqrt, pi
+
 states = []
 transitions = []
 page_width = 1024
@@ -123,6 +125,12 @@ class Selected(BaseState):
             application.changeState(NewTransition)
             application.state.mouseDragged()
 
+    def keyReleased(self):
+        if keyCode == 8:
+            application.selected_state.selected = False
+            states.remove(application.selected_state)
+            application.changeState(Ready)
+
 
 @singleton
 class NewTransition(BaseState):
@@ -140,9 +148,10 @@ class NewTransition(BaseState):
     @transition('Selected')
     def mouseReleased(self):
         for state in states:
+            if state == application.selected_state:
+                continue
             if state.is_selected():
                 application.selected_transition.to_state = state
-                print "found state ", state
                 break
         application.changeState(Selected)
 
@@ -187,10 +196,16 @@ class Edit(BaseState):
             application.changeState(Ready)
             application.state.mousePressed()
 
+    def keyReleased(self):
+        if keyCode == 8:
+            application.selected_state.label = application.selected_state.label[:-1]
+
     @transition('Selected')
     def keyTyped(self):
+        print key, keyCode
         if key == CODED:
-            pass
+            if keyCode == 8:
+                application.selected_state.label = application.selected_state.label[:-1]
         else:
             if key == RETURN:
                 application.changeState(Selected)
@@ -306,14 +321,20 @@ class FSMState(object):
         return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
 
 
-def arrow(x1, y1, x2, y2, arrow_offset):
+def arrow(x1, y1, x2, y2, arrow_offset, label=""):
     line(x1, y1, x2, y2)
     line(x2, y2, x2, y2)
     pushMatrix()
     translate(x2, y2)
     rotate(atan2(y2-y1, x2-x1))
+    pushMatrix()
     translate(-arrow_offset, 0)
     triangle(0, 0, -10, 5, -10, -5)
+    popMatrix()
+    translate(-sqrt((y2-y1)**2 + (x2-x1)**2)/2.0, 0)
+    if abs(atan2(y2-y1, x2-x1)) > 2:
+        rotate(pi)
+    text(label, -textWidth(label) / 2, -TEXT_SIZE * 0.5)
     popMatrix()
 
 
@@ -322,7 +343,7 @@ class FSMTransition(object):
     def __init__(self, **kwargs):
         self.from_state = None
         self.to_state = None
-        self.label = None
+        self.label = "foobar"
         self.__dict__.update(kwargs)
 
     def draw(self):
@@ -330,9 +351,9 @@ class FSMTransition(object):
         stroke(0)
         fill(0)
         if self.from_state is not None and self.to_state is None:
-            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0)
+            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0, self.label)
         if self.from_state is not None and self.to_state is not None:
-            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2)
+            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2, self.label)
 
 
 class Wheel(object):
@@ -408,7 +429,7 @@ class Application(object):
         text(scaleXYT,
              page_width - 100 - textWidth(scaleXYT),
              page_height - 10)
-        key_t = "keyCode: {0}".format(lastKeyCode)
+        key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
         text(key_t,
              page_width - 100 - textWidth(key_t),
              page_height - 70)
