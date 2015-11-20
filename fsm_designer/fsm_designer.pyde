@@ -2,9 +2,16 @@
 
 from fsm import State, transition, to_yaml, singleton
 
+import yaml
+
+import os
 import sys
+import traceback
+import itertools
 
 from math import sqrt, pi
+
+state_sequence = itertools.count(start=0, step=1)
 
 states = []
 transitions = []
@@ -339,6 +346,74 @@ class ScaleAndPan(BaseState):
 
 
 @singleton
+class Load(BaseState):
+
+    def start(self):
+        selectInput("Input file", "fileSelected")
+
+    def fileSelected(self, selection):
+        global states, transitions, panX, panY, scaleXY
+        try:
+            print selection, type(selection)
+            if selection:
+                new_states = []
+                new_transitions = []
+                with open(selection.getAbsolutePath()) as f:
+                    d = yaml.load(f.read())
+                    print d
+                for state_d in d.get('states', []):
+                    state = FSMState(label=state_d.get('label'),
+                                     x=state_d.get('x', 0),
+                                     y=state_d.get('y', 0),
+                                     color=state_d.get('color', 255),
+                                     size=state_d.get('size', 100))
+                    new_states.append(state)
+                for transition_d in d.get('transitions', []):
+                    from_state = [s for s in new_states if s.label == transition_d['from_state']]
+                    to_state = [s for s in new_states if s.label == transition_d['to_state']]
+                    assert len(from_state) == 1, str(from_state)
+                    assert len(to_state) == 1, str(to_state)
+                    t = FSMTransition(label=transition_d.get('label'),
+                                      to_state=to_state[0],
+                                      from_state=from_state[0])
+                    new_transitions.append(t)
+                view_d = d.get('view', {})
+                panX = view_d.get('panX', 0)
+                panY = view_d.get('panY', 0)
+                scaleXY = view_d.get('scaleXY', 1)
+                states = new_states
+                transitions = new_transitions
+            print "Read from {0}".format(selection)
+            application.changeState(Ready)
+        except Exception:
+            print traceback.format_exc()
+
+
+@singleton
+class Save(BaseState):
+
+    def start(self):
+        selectOutput("Output file", "fileSelected")
+
+    @transition('Ready')
+    def fileSelected(self, selection):
+        try:
+            print selection, type(selection)
+            if selection:
+                app = {}
+                app['app'] = os.path.splitext(os.path.basename(selection.getAbsolutePath()))[0]
+                app['view'] =  dict(panX=panX, panY=panY, scaleXY=scaleXY)
+                app['states'] = [s.to_dict() for s in states]
+                app['transitions'] = [t.to_dict() for t in transitions]
+                with open(selection.getAbsolutePath(), 'w') as f:
+                    f.write(yaml.safe_dump(app, default_flow_style=False))
+            print "Wrote to {0}".format(selection)
+            application.changeState(Ready)
+        except Exception:
+            print traceback.format_exc()
+
+
+@singleton
 class NewState(BaseState):
 
     def name(self):
@@ -346,7 +421,7 @@ class NewState(BaseState):
 
     @transition(Ready)
     def start(self):
-        s = FSMState(name="New", x=mousePX, y=mousePY)
+        s = FSMState(label="S{0}".format(next(state_sequence)), x=mousePX, y=mousePY)
         states.append(s)
         application.changeState(Ready)
 
@@ -366,9 +441,9 @@ class MenuWheel(BaseState):
         if menu_selection == "New":
             application.changeState(NewState)
         elif menu_selection == "Save":
-            application.changeState(Ready)
+            application.changeState(Save)
         elif menu_selection == "Load":
-            application.changeState(Ready)
+            application.changeState(Load)
         else:
             application.changeState(Ready)
 
@@ -384,6 +459,15 @@ class FSMState(object):
         self.selected = False
         self.edit = False
         self.__dict__.update(kwargs)
+
+    def to_dict(self):
+        d = {}
+        d['label'] = self.label
+        d['x'] = self.x
+        d['y'] = self.y
+        d['color'] = self.color
+        d['size'] = self.size
+        return d
 
     def draw(self):
         stroke(0)
@@ -447,6 +531,13 @@ class FSMTransition(object):
         self.selected = False
         self.edit = False
         self.__dict__.update(kwargs)
+
+    def to_dict(self):
+        d = {}
+        d['label'] = self.label
+        d['to_state'] = self.to_state.label
+        d['from_state'] = self.from_state.label
+        return d
 
     def is_selected(self):
         x1 = self.from_state.x
