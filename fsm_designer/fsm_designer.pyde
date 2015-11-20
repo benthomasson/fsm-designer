@@ -61,21 +61,86 @@ class Other(BaseState):
 @singleton
 class Ready(BaseState):
 
-    @transition(Other)
-    def on_hello(self):
-        pass
+    @transition('MenuWheel')
+    @transition('ScaleAndPan')
+    @transition('Selected')
+    def mousePressed(self):
+        if mouseButton == RIGHT:
+            application.changeState(MenuWheel)
+
+        elif mouseButton == LEFT:
+            application.selected_state = None
+            for state in states:
+                if state.is_selected() and application.selected_state is None:
+                    state.selected = True
+                    application.selected_state = state
+                else:
+                    state.selected = False
+
+            if application.selected_state is None:
+                application.changeState(ScaleAndPan)
+            else:
+                application.changeState(Selected)
+
+    def keyPressed(self):
+        global lastKeyCode
+        lastKeyCode = keyCode
+
+
+@singleton
+class Selected(BaseState):
 
     @transition('MenuWheel')
+    @transition('Edit')
+    @transition('Ready')
     def mousePressed(self):
+        if mouseButton == RIGHT:
+            application.selected_state.selected = False
+            application.selected_state = None
+            application.changeState(MenuWheel)
+        elif mouseButton == LEFT:
+            if application.selected_state.is_selected():
+                application.changeState(Edit)
+            else:
+                application.selected_state.selected = False
+                application.selected_state = None
+                application.changeState(Ready)
+
+
+@singleton
+class Edit(BaseState):
+
+    def start(self):
+        application.selected_state.edit = True
+
+    def end(self):
+        application.selected_state.edit = False
+
+
+    @transition('Selected')
+    def keyTyped(self):
+        if key == RETURN:
+            application.changeState(Selected)
+        elif key == ENTER:
+            application.changeState(Selected)
+        elif key == BACKSPACE:
+            application.selected_state.label = application.selected_state.label[:-1]
+        elif key == DELETE:
+            application.selected_state.label = application.selected_state.label[:-1]
+        else:
+            application.selected_state.label += key
+
+
+@singleton
+class ScaleAndPan(BaseState):
+
+    def start(self):
         global mousePressedX, mousePressedY, oldPanX, oldPanY, oldScaleXY
         mousePressedX = mouseX
         mousePressedY = mouseY
         oldPanX = panX
         oldPanY = panY
         oldScaleXY = scaleXY
-
-        if mouseButton == RIGHT:
-            application.changeState(MenuWheel)
 
     def mouseDragged(self):
         global panX, panY, scaleXY
@@ -87,9 +152,11 @@ class Ready(BaseState):
             panX = (mouseX - mousePressedX) / scaleXY + oldPanX
             panY = (mouseY - mousePressedY) / scaleXY + oldPanY
 
+    @transition('Ready')
     def mouseReleased(self):
         global lastKeyCode
         lastKeyCode = 0
+        application.changeState(Ready)
 
     def keyPressed(self):
         global lastKeyCode
@@ -98,6 +165,7 @@ class Ready(BaseState):
     def keyReleased(self):
         global lastKeyCode
         lastKeyCode = 0
+
 
 @singleton
 class NewState(BaseState):
@@ -139,14 +207,30 @@ class FSMState(object):
     def __init__(self, **kwargs):
         self.x = 0
         self.y = 0
-        self.label = None
+        self.label = ""
         self.size = 100
         self.color = 255
+        self.selected = False
+        self.edit = False
         self.__dict__.update(kwargs)
 
     def draw(self):
+        stroke(0)
         fill(self.color)
         ellipse(self.x, self.y, self.size, self.size)
+        if self.selected:
+            strokeWeight(2)
+            noFill()
+            stroke("#66FFFF")
+            ellipse(self.x, self.y, self.size+6, self.size+6)
+        fill(0)
+        if self.edit:
+            text(self.label + "_", self.x - textWidth(self.label + "_")/2, self.y)
+        else:
+            text(self.label, self.x - textWidth(self.label)/2, self.y)
+
+    def is_selected(self):
+        return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
 
 
 class FSMTransition(object):
@@ -197,6 +281,7 @@ class Application(object):
     def __init__(self):
         self.state = Ready
         self.wheel = None
+        self.selected_state = None
 
     def changeState(self, state):
         if self.state:
@@ -240,8 +325,6 @@ class Application(object):
              page_width - 100 - textWidth(mouseButton_t),
              page_height - 90)
 
-
-
         if self.wheel:
             self.wheel.draw()
 
@@ -262,10 +345,8 @@ def draw():
     mousePY = mouseY / scaleXY - panY
     background(102)
     application.draw()
-    rect(0,0,100,100)
     scale(scaleXY)
     translate(panX, panY)
-    rect(0,0,100,100)
     for state in states:
         state.draw()
 
