@@ -68,14 +68,27 @@ def validate_design(design, module, name=None):
 
 def generate_code(missing_states, missing_transitions):
 
+    code = "from fsm import singleton, transition, State"
+
     for state in missing_states:
-        state_missing_transitions = [dict(x) for x in missing_transitions if dict(x).get('from_state')]
-        return jinja2.Template("""\
+        state_missing_transitions = [dict(x) for x in missing_transitions if dict(x).get('from_state') == state]
+        functions = dict()
+        for t in state_missing_transitions:
+            transitions = functions.get(t['label'], [])
+            transitions.append(t)
+            functions[t['label']] = transitions
+        code += jinja2.Template("""\
+
+
 @singleton
 class {{state}}(State):
-    {%for t in transitions %}
-    @transition('{{t.to_state}}')
-    def {{t.label}}(self, controller):
+    {%for f_name, transitions in functions %}{%for t in transitions%}
+    @transition('{{t.to_state}}'){%endfor%}
+    def {{f_name}}(self, controller):
+        {%for t in transitions-%}
         controller.changeState({{t.to_state}})
+        {%endfor%}{%else%}pass
     {%endfor%}
-""").render(state=state, transitions=state_missing_transitions)
+""").render(state=state, functions=functions.iteritems())
+
+    return code

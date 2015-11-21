@@ -32,10 +32,14 @@ def validate_self():
 
     with open("design.yml") as f:
         design = yaml.load(f.read())
-        missing_states, missing_transitions = validate_design(design, sys.modules[__name__], "fsm_designer")
+        missing_states, missing_transitions = validate_design(design, design_fsm, "fsm_designer")
+        logger.debug(missing_states)
+        logger.debug(missing_transitions)
         if missing_states or missing_transitions:
             print "Self validation failed! Example code:"
             print generate_code(missing_states, missing_transitions)
+        else:
+            logger.info("Self validation completed")
 
 
 def settings():
