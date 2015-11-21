@@ -1,6 +1,7 @@
 
 from math import sqrt, pi
 import logging
+import itertools
 
 from conf import settings
 from widgets import arrow
@@ -31,7 +32,7 @@ class FSMState(object):
         d['size'] = self.size
         return d
 
-    def draw(self):
+    def draw(self, controller):
         stroke(0)
         fill(self.color)
         ellipse(self.x, self.y, self.size, self.size)
@@ -46,8 +47,8 @@ class FSMState(object):
         else:
             text(self.label, self.x - textWidth(self.label)/2, self.y)
 
-    def is_selected(self):
-        return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
+    def is_selected(self, controller):
+        return (controller.mousePX - self.x)**2 + (controller.mousePY - self.y)**2 < (self.size/2)**2
 
 
 class FSMTransition(object):
@@ -67,13 +68,13 @@ class FSMTransition(object):
         d['from_state'] = self.from_state.label
         return d
 
-    def is_selected(self):
+    def is_selected(self, controller):
         x1 = self.from_state.x
         y1 = self.from_state.y
         x2 = self.to_state.x
         y2 = self.to_state.y
-        x = mousePX
-        y = mousePY
+        x = controller.mousePX
+        y = controller.mousePY
 
         dx = x2 - x1
         dy = y2 - y1
@@ -103,7 +104,7 @@ class FSMTransition(object):
         distance = sqrt(dx*dx + dy*dy)
         line_atan = atan2(y2-y1, x2-x1)
         pline_atan = atan2(result_y-y, result_x-x)
-        if application.debug:
+        if controller.debug:
             logger.debug("%s %s", line_atan, pline_atan)
             if abs(line_atan) < pi/2.0 and pline_atan < 0:
                 stroke(0)
@@ -123,16 +124,16 @@ class FSMTransition(object):
         else:
             selected_distance = 10 + settings.TEXT_SIZE * (self.label_offset + 1.5)
         if distance < selected_distance:
-            if application.debug:
+            if controller.debug:
                 stroke(settings.SELECTED_COLOR)
                 line(x, y, result_x, result_y)
             return True
         else:
             return False
 
-    def draw(self):
+    def draw(self, controller):
         self.label_offset = 0
-        for t in transitions:
+        for t in controller.transitions:
             if t == self:
                 break
             if t.to_state == self.to_state and t.from_state == self.from_state:
@@ -143,8 +144,8 @@ class FSMTransition(object):
         if self.from_state is not None and self.to_state is None:
             arrow(self.from_state.x,
                   self.from_state.y,
-                  mousePX,
-                  mousePY,
+                  controller.mousePX,
+                  controller.mousePY,
                   0,
                   label,
                   self.selected,
@@ -158,3 +159,77 @@ class FSMTransition(object):
                   label,
                   self.selected,
                   self.label_offset)
+
+
+class Application(object):
+
+    def __init__(self):
+        self.state_sequence = itertools.count(start=0, step=1)
+        self.states = []
+        self.transitions = []
+        self.panX = 0
+        self.panY = 0
+        self.oldPanX = 0
+        self.oldPanY = 0
+        self.scaleXY = 1
+        self.oldScaleXY = 0
+        self.mousePX = 0
+        self.mousePY = 0
+        self.mousePressedX = 0
+        self.mousePressedY = 0
+        self.lastKeyCode = 0
+        self.state = None
+        self.wheel = None
+        self.selected_state = None
+        self.selected_transition = None
+        self.debug = False
+
+    def changeState(self, state):
+        if self.state:
+            self.state.end(self)
+        self.state = state
+        if self.state:
+            self.state.start(self)
+
+    def draw(self, controller):
+        if self.debug:
+            fill(255)
+            textSize(settings.TEXT_SIZE)
+            xy_t = "xy_t: {0}, {1}".format(mouseX, mouseY)
+            text(xy_t,
+                 width - 100 - textWidth(xy_t),
+                 height - 150)
+            xyp_t = "xyp_t: {0}, {1}".format(controller.mousePX, controller.mousePY)
+            text(xyp_t,
+                 width - 100 - textWidth(xyp_t),
+                 height - 130)
+            text(self.state.name(),
+                 width - 100 - textWidth(self.state.name()),
+                 height - 110)
+            fps = "fps: {0}".format(int(frameRate))
+            text(fps,
+                 width - 100 - textWidth(fps),
+                 height - 50)
+            pan = "pan: {0}, {1}".format(int(controller.panX), int(controller.panY))
+            text(pan,
+                 width - 100 - textWidth(pan),
+                 height - 30)
+            scaleXYT = "scale: {0}".format(controller.scaleXY)
+            text(scaleXYT,
+                 width - 100 - textWidth(scaleXYT),
+                 height - 10)
+            try:
+                key_t = ""
+                key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
+            except Exception:
+                pass
+            text(key_t,
+                 width - 100 - textWidth(key_t),
+                 height - 70)
+            mouseButton_t = "mouseButton: {0}".format(mouseButton)
+            text(mouseButton_t,
+                 width - 100 - textWidth(mouseButton_t),
+                 height - 90)
+
+        if self.wheel:
+            self.wheel.draw()
