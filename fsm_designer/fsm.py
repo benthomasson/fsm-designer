@@ -1,5 +1,6 @@
 
 
+import jinja2
 import yaml
 import inspect
 
@@ -27,10 +28,10 @@ class State(object):
     pass
 
 
-def to_yaml(module=None):
+def to_fsm_dict(module, name=None):
     states = []
     transitions = []
-    app = dict(name=module.__name__, states=states, transitions=transitions)
+    fsm = dict(name=name or module.__name__, states=states, transitions=transitions)
     for key in dir(module):
         value = getattr(module, key)
         if isinstance(value, State):
@@ -45,4 +46,36 @@ def to_yaml(module=None):
             if hasattr(fn, 'state_transitions'):
                 for destination in getattr(fn, 'state_transitions'):
                     transitions.append(dict(label=name, from_state=state_class.__name__, to_state=destination))
-    return yaml.dump(app, default_flow_style=False)
+    return fsm
+
+
+def to_yaml(module, name=None):
+    fsm = to_fsm_dict(module, name)
+    return yaml.dump(fsm, default_flow_style=False)
+
+
+def validate_design(design, module, name=None):
+    actual = to_fsm_dict(module, name)
+    design_states = set([s.get('label', '') for s in design.get('states', [])])
+    actual_states = set([s.get('label', '') for s in actual.get('states', [])])
+    missing_states = design_states - actual_states
+    design_transitions = set([tuple(s.items()) for s in design.get('transitions', [])])
+    actual_transitions = set([tuple(s.items()) for s in actual.get('transitions', [])])
+    missing_transitions = design_transitions - actual_transitions
+
+    return missing_states, missing_transitions
+
+
+def generate_code(missing_states, missing_transitions):
+
+    for state in missing_states:
+        state_missing_transitions = [dict(x) for x in missing_transitions if dict(x).get('from_state')]
+        return jinja2.Template("""\
+@singleton
+class {{state}}(State):
+    {%for t in transitions %}
+    @transition('{{t.to_state}}')
+    def {{t.label}}(self, controller):
+        controller.changeState({{t.to_state}})
+    {%endfor%}
+""").render(state=state, transitions=state_missing_transitions)

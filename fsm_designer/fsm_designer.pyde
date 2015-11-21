@@ -1,6 +1,6 @@
 
 
-from fsm import State, transition, to_yaml, singleton
+from fsm import State, transition, to_yaml, singleton, validate_design, generate_code
 
 import yaml
 
@@ -9,8 +9,11 @@ import sys
 import traceback
 import itertools
 import random
+import logging
 
 from math import sqrt, pi
+
+logger = logging.getLogger("fsm_designer")
 
 state_sequence = itertools.count(start=0, step=1)
 
@@ -65,7 +68,6 @@ class BaseState(State):
         pass
 
 
-
 def select_item():
     application.selected_state = None
     for state in states:
@@ -81,6 +83,14 @@ def select_item():
             application.selected_transition = t
         else:
             t.selected = False
+
+
+@singleton
+class Start(BaseState):
+
+    @transition('Ready')
+    def start(self):
+        application.changeState(Ready)
 
 
 @singleton
@@ -106,6 +116,12 @@ class Ready(BaseState):
     def keyPressed(self):
         global lastKeyCode
         lastKeyCode = keyCode
+
+    def keyTyped(self):
+        if key == CODED:
+            pass
+        elif key == "d":
+            application.debug = not application.debug
 
 
 @singleton
@@ -161,7 +177,6 @@ class EditTransition(BaseState):
 
     @transition('SelectedTransition')
     def keyTyped(self):
-        print key, keyCode
         if key == CODED:
             if keyCode == 8:
                 application.selected_transition.label = application.selected_transition.label[:-1]
@@ -288,7 +303,6 @@ class Edit(BaseState):
 
     @transition('Selected')
     def keyTyped(self):
-        print key, keyCode
         if key == CODED:
             if keyCode == 8:
                 application.selected_state.label = application.selected_state.label[:-1]
@@ -351,13 +365,11 @@ class Load(BaseState):
     def fileSelected(self, selection):
         global states, transitions, panX, panY, scaleXY
         try:
-            print selection, type(selection)
             if selection:
                 new_states = []
                 new_transitions = []
                 with open(selection.getAbsolutePath()) as f:
                     d = yaml.load(f.read())
-                    print d
                 for state_d in d.get('states', []):
                     label = state_d.get('label') or "S{0}".format(next(state_sequence))
                     state = FSMState(label=label,
@@ -381,10 +393,10 @@ class Load(BaseState):
                 scaleXY = view_d.get('scaleXY', 1)
                 states = new_states
                 transitions = new_transitions
-            print "Read from {0}".format(selection)
+            logging.info("Read from {0}".format(selection))
             application.changeState(Ready)
         except Exception:
-            print traceback.format_exc()
+            logging.error(traceback.format_exc())
 
 
 @singleton
@@ -396,19 +408,18 @@ class Save(BaseState):
     @transition('Ready')
     def fileSelected(self, selection):
         try:
-            print selection, type(selection)
             if selection:
                 app = {}
                 app['app'] = os.path.splitext(os.path.basename(selection.getAbsolutePath()))[0]
-                app['view'] =  dict(panX=panX, panY=panY, scaleXY=scaleXY)
+                app['view'] = dict(panX=panX, panY=panY, scaleXY=scaleXY)
                 app['states'] = [s.to_dict() for s in states]
                 app['transitions'] = [t.to_dict() for t in transitions]
                 with open(selection.getAbsolutePath(), 'w') as f:
                     f.write(yaml.safe_dump(app, default_flow_style=False))
-            print "Wrote to {0}".format(selection)
+            logging.info("Wrote to {0}".format(selection))
             application.changeState(Ready)
         except Exception:
-            print traceback.format_exc()
+            logging.error(traceback.format_exc())
 
 
 @singleton
@@ -624,10 +635,11 @@ class Wheel(object):
 class Application(object):
 
     def __init__(self):
-        self.state = Ready
+        self.state = None
         self.wheel = None
         self.selected_state = None
         self.selected_transition = None
+        self.debug = False
 
     def changeState(self, state):
         if self.state:
@@ -637,62 +649,78 @@ class Application(object):
             self.state.start()
 
     def draw(self):
-        fill(255)
-        textSize(TEXT_SIZE)
-        xy_t = "xy_t: {0}, {1}".format(mouseX, mouseY)
-        text(xy_t,
-             width - 100 - textWidth(xy_t),
-             height - 150)
-        xyp_t = "xyp_t: {0}, {1}".format(mousePX, mousePY)
-        text(xyp_t,
-             width - 100 - textWidth(xyp_t),
-             height - 130)
-        text(self.state.name(),
-             width - 100 - textWidth(self.state.name()),
-             height - 110)
-        fps = "fps: {0}".format(int(frameRate))
-        text(fps,
-             width - 100 - textWidth(fps),
-             height - 50)
-        pan = "pan: {0}, {1}".format(int(panX), int(panY))
-        text(pan,
-             width - 100 - textWidth(pan),
-             height - 30)
-        scaleXYT = "scale: {0}".format(scaleXY)
-        text(scaleXYT,
-             width - 100 - textWidth(scaleXYT),
-             height - 10)
-        try:
-            key_t = ""
-            key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
-        except Exception:
-            pass
-        text(key_t,
-             width - 100 - textWidth(key_t),
-             height - 70)
-        mouseButton_t = "mouseButton: {0}".format(mouseButton)
-        text(mouseButton_t,
-             width - 100 - textWidth(mouseButton_t),
-             height - 90)
+        if self.debug:
+            fill(255)
+            textSize(TEXT_SIZE)
+            xy_t = "xy_t: {0}, {1}".format(mouseX, mouseY)
+            text(xy_t,
+                 width - 100 - textWidth(xy_t),
+                 height - 150)
+            xyp_t = "xyp_t: {0}, {1}".format(mousePX, mousePY)
+            text(xyp_t,
+                 width - 100 - textWidth(xyp_t),
+                 height - 130)
+            text(self.state.name(),
+                 width - 100 - textWidth(self.state.name()),
+                 height - 110)
+            fps = "fps: {0}".format(int(frameRate))
+            text(fps,
+                 width - 100 - textWidth(fps),
+                 height - 50)
+            pan = "pan: {0}, {1}".format(int(panX), int(panY))
+            text(pan,
+                 width - 100 - textWidth(pan),
+                 height - 30)
+            scaleXYT = "scale: {0}".format(scaleXY)
+            text(scaleXYT,
+                 width - 100 - textWidth(scaleXYT),
+                 height - 10)
+            try:
+                key_t = ""
+                key_t = "key: {0} keyCode: {1}".format(str(key).strip(), keyCode)
+            except Exception:
+                pass
+            text(key_t,
+                 width - 100 - textWidth(key_t),
+                 height - 70)
+            mouseButton_t = "mouseButton: {0}".format(mouseButton)
+            text(mouseButton_t,
+                 width - 100 - textWidth(mouseButton_t),
+                 height - 90)
 
         if self.wheel:
             self.wheel.draw()
 
 
-with open("self.yml", 'w') as f:
-    self_yml = to_yaml(sys.modules[__name__])
-    print self_yml
-    f.write(self_yml)
+def validate_self():
 
+    logging.debug("pwd: {0}".format(os.getcwd()))
+
+    with open("current.yml", 'w') as f:
+        self_yml = to_yaml(sys.modules[__name__], "fsm_designer")
+        f.write(self_yml)
+
+
+    with open("design.yml") as f:
+        design = yaml.load(f.read())
+        missing_states, missing_transitions = validate_design(design, sys.modules[__name__], "fsm_designer")
+        if missing_states or missing_transitions:
+            print "Self validation failed! Example code:"
+            print generate_code(missing_states, missing_transitions)
 
 
 def setup():
     global application
+    logging.basicConfig(level=logging.DEBUG)
+    logging.debug("Debug logging enabled")
     size(page_width, page_height, FX2D)
     application = Application()
+    application.changeState(Start)
     frame.setTitle("FSM Designer")
     frame.setResizable(True)
     frameRate(30)
+    validate_self()
+    logging.debug("setup completed")
 
 
 def draw():
