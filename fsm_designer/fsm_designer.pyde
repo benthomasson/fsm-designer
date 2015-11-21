@@ -4,6 +4,9 @@ from fsm import State, transition, to_yaml, singleton, validate_design, generate
 
 import yaml
 
+from conf import settings as conf_settings
+from widgets import arrow, Wheel
+
 import os
 import sys
 import traceback
@@ -15,24 +18,11 @@ from math import sqrt, pi
 
 logger = logging.getLogger("fsm_designer")
 
-state_sequence = itertools.count(start=0, step=1)
 
-states = []
-transitions = []
 page_width = 1024
 page_height = 768
-panX = 0
-panY = 0
-scaleXY = 1.0
-oldScaleXY = 0
-lastKeyCode = 0
-mousePX = mousePY = 0
-oldPanX = oldPanY = 0
-mousePressedX = mousePressedY = 0
-TEXT_SIZE = 12
-application = None
 
-SELECTED_COLOR = "#66FFFF"
+application = None
 
 
 class BaseState(State):
@@ -70,15 +60,15 @@ class BaseState(State):
 
 def select_item(controller):
     controller.selected_state = None
-    for state in states:
-        if state.is_selected() and controller.selected_state is None:
+    for state in controller.states:
+        if state.is_selected(controller) and controller.selected_state is None:
             state.selected = True
             controller.selected_state = state
         else:
             state.selected = False
     controller.selected_transition = None
-    for t in transitions:
-        if t.is_selected() and controller.selected_transition is None and controller.selected_state is None:
+    for t in controller.transitions:
+        if t.is_selected(controller) and controller.selected_transition is None and controller.selected_state is None:
             t.selected = True
             controller.selected_transition = t
         else:
@@ -114,8 +104,7 @@ class Ready(BaseState):
                 controller.changeState(ScaleAndPan)
 
     def keyPressed(self, controller):
-        global lastKeyCode
-        lastKeyCode = keyCode
+        controller.lastKeyCode = keyCode
 
     def keyTyped(self, controller):
         if key == CODED:
@@ -132,14 +121,14 @@ class SelectedTransition(BaseState):
     @transition('Ready')
     def mousePressed(self, controller):
         if mouseButton == RIGHT:
-            if controller.selected_transition.is_selected():
+            if controller.selected_transition.is_selected(controller):
                 controller.changeState(EditTransition)
             else:
                 controller.selected_transition.selected = False
                 controller.selected_transition = None
                 controller.changeState(MenuWheel)
         elif mouseButton == LEFT:
-            if controller.selected_transition.is_selected():
+            if controller.selected_transition.is_selected(controller):
                 pass
             else:
                 controller.changeState(Ready)
@@ -148,7 +137,7 @@ class SelectedTransition(BaseState):
     def keyReleased(self, controller):
         if keyCode == 8:
             controller.selected_transition.selected = False
-            transitions.remove(controller.selected_transition)
+            controller.transitions.remove(controller.selected_transition)
             controller.changeState(Ready)
 
 
@@ -164,7 +153,7 @@ class EditTransition(BaseState):
     @transition('SelectedTransition')
     @transition('Ready')
     def mousePressed(self, controller):
-        if controller.selected_transition.is_selected():
+        if controller.selected_transition.is_selected(controller):
             controller.changeState(SelectedTransition)
             controller.state.mousePressed(controller)
         else:
@@ -202,14 +191,14 @@ class Selected(BaseState):
     @transition('Move')
     def mousePressed(self, controller):
         if mouseButton == RIGHT:
-            if controller.selected_state.is_selected():
+            if controller.selected_state.is_selected(controller):
                 controller.changeState(Edit)
             else:
                 controller.selected_state.selected = False
                 controller.selected_state = None
                 controller.changeState(MenuWheel)
         elif mouseButton == LEFT:
-            if controller.selected_state.is_selected():
+            if controller.selected_state.is_selected(controller):
                 controller.changeState(Move)
             else:
                 controller.changeState(Ready)
@@ -228,7 +217,11 @@ class Selected(BaseState):
     def keyReleased(self, controller):
         if keyCode == 8:
             controller.selected_state.selected = False
-            states.remove(controller.selected_state)
+            controller.states.remove(controller.selected_state)
+            for t in controller.transitions[:]:
+                if t.to_state == controller.selected_state or t.from_state == controller.selected_state:
+                    controller.transitions.remove(t)
+            controller.selected_state = None
             controller.changeState(Ready)
 
 
@@ -237,21 +230,21 @@ class NewTransition(BaseState):
 
     def start(self, controller):
         new_transition = FSMTransition(from_state=controller.selected_state, selected=True)
-        transitions.append(new_transition)
+        controller.transitions.append(new_transition)
         controller.selected_transition = new_transition
 
     def end(self, controller):
         if controller.selected_transition is not None and controller.selected_transition.to_state is None:
-            transitions.remove(controller.selected_transition)
+            controller.transitions.remove(controller.selected_transition)
         controller.selected_transition.selected = False
         controller.selected_transition = None
 
     @transition('Selected')
     def mouseReleased(self, controller):
-        for state in states:
+        for state in controller.states:
             if state == controller.selected_state:
                 continue
-            if state.is_selected():
+            if state.is_selected(controller):
                 controller.selected_transition.to_state = state
                 break
         controller.changeState(Selected)
@@ -260,12 +253,9 @@ class NewTransition(BaseState):
 @singleton
 class Move(BaseState):
 
-    def start(self, controller):
-        global mousePressedX, mousePressedY
-
     def mouseDragged(self, controller):
-        controller.selected_state.x = mousePX
-        controller.selected_state.y = mousePY
+        controller.selected_state.x = controller.mousePX
+        controller.selected_state.y = controller.mousePY
 
     @transition('Selected')
     def mouseReleased(self, controller):
@@ -290,7 +280,7 @@ class Edit(BaseState):
     @transition('Selected')
     @transition('Ready')
     def mousePressed(self, controller):
-        if controller.selected_state.is_selected():
+        if controller.selected_state.is_selected(controller):
             controller.changeState(Selected)
             controller.state.mousePressed(controller)
         else:
@@ -323,36 +313,31 @@ class Edit(BaseState):
 class ScaleAndPan(BaseState):
 
     def start(self, controller):
-        global mousePressedX, mousePressedY, oldPanX, oldPanY, oldScaleXY
-        mousePressedX = mouseX
-        mousePressedY = mouseY
-        oldPanX = panX
-        oldPanY = panY
-        oldScaleXY = scaleXY
+        controller.mousePressedX = mouseX
+        controller.mousePressedY = mouseY
+        controller.oldPanX = controller.panX
+        controller.oldPanY = controller.panY
+        controller.oldScaleXY = controller.scaleXY
 
     def mouseDragged(self, controller):
-        global panX, panY, scaleXY
-        if mouseButton == LEFT and lastKeyCode == ALT:
-            scaleXY = max(0.1, (mouseY - mousePressedY) / 100.0 + oldScaleXY)
-            panX = oldPanX + (-1 * mousePressedX / oldScaleXY) + (mousePressedX / scaleXY)
-            panY = oldPanY + (-1 * mousePressedY / oldScaleXY) + (mousePressedY / scaleXY)
+        if mouseButton == LEFT and controller.lastKeyCode == ALT:
+            controller.scaleXY = max(0.1, (mouseY - controller.mousePressedY) / 100.0 + controller.oldScaleXY)
+            controller.panX = controller.oldPanX + (-1 * controller.mousePressedX / controller.oldScaleXY) + (controller.mousePressedX / controller.scaleXY)
+            controller.panY = controller.oldPanY + (-1 * controller.mousePressedY / controller.oldScaleXY) + (controller.mousePressedY / controller.scaleXY)
         elif mouseButton == LEFT:
-            panX = (mouseX - mousePressedX) / scaleXY + oldPanX
-            panY = (mouseY - mousePressedY) / scaleXY + oldPanY
+            controller.panX = (mouseX - controller.mousePressedX) / controller.scaleXY + controller.oldPanX
+            controller.panY = (mouseY - controller.mousePressedY) / controller.scaleXY + controller.oldPanY
 
     @transition('Ready')
     def mouseReleased(self, controller):
-        global lastKeyCode
-        lastKeyCode = 0
+        controller.lastKeyCode = 0
         controller.changeState(Ready)
 
     def keyPressed(self, controller):
-        global lastKeyCode
-        lastKeyCode = keyCode
+        controller.lastKeyCode = keyCode
 
     def keyReleased(self, controller):
-        global lastKeyCode
-        lastKeyCode = 0
+        controller.lastKeyCode = 0
 
 
 @singleton
@@ -363,7 +348,6 @@ class Load(BaseState):
 
     @transition('Ready')
     def fileSelected(self, controller, selection):
-        global states, transitions, panX, panY, scaleXY
         try:
             if selection:
                 new_states = []
@@ -371,10 +355,10 @@ class Load(BaseState):
                 with open(selection.getAbsolutePath()) as f:
                     d = yaml.load(f.read())
                 for state_d in d.get('states', []):
-                    label = state_d.get('label') or "S{0}".format(next(state_sequence))
+                    label = state_d.get('label') or "S{0}".format(next(controller.state_sequence))
                     state = FSMState(label=label,
-                                     x=state_d.get('x', random.randrange(int(panX), int(width*scaleXY + panX))),
-                                     y=state_d.get('y', random.randrange(int(panY), int(height*scaleXY + panY))),
+                                     x=state_d.get('x', random.randrange(int(controller.panX), int(width*controller.scaleXY + controller.panX))),
+                                     y=state_d.get('y', random.randrange(int(controller.panY), int(height*controller.scaleXY + controller.panY))),
                                      color=state_d.get('color', 255),
                                      size=state_d.get('size', max(100, textWidth(label) + 20)))
                     new_states.append(state)
@@ -388,11 +372,11 @@ class Load(BaseState):
                                       from_state=from_state[0])
                     new_transitions.append(t)
                 view_d = d.get('view', {})
-                panX = view_d.get('panX', 0)
-                panY = view_d.get('panY', 0)
-                scaleXY = view_d.get('scaleXY', 1)
-                states = new_states
-                transitions = new_transitions
+                controller.panX = view_d.get('panX', 0)
+                controller.panY = view_d.get('panY', 0)
+                controller.scaleXY = view_d.get('scaleXY', 1)
+                controller.states = new_states
+                controller.transitions = new_transitions
             logging.info("Read from {0}".format(selection))
             controller.changeState(Ready)
         except Exception:
@@ -411,9 +395,9 @@ class Save(BaseState):
             if selection:
                 app = {}
                 app['app'] = os.path.splitext(os.path.basename(selection.getAbsolutePath()))[0]
-                app['view'] = dict(panX=panX, panY=panY, scaleXY=scaleXY)
-                app['states'] = [s.to_dict() for s in states]
-                app['transitions'] = [t.to_dict() for t in transitions]
+                app['view'] = dict(panX=controller.panX, panY=controller.panY, scaleXY=controller.scaleXY)
+                app['states'] = [s.to_dict() for s in controller.states]
+                app['transitions'] = [t.to_dict() for t in controller.transitions]
                 with open(selection.getAbsolutePath(), 'w') as f:
                     f.write(yaml.safe_dump(app, default_flow_style=False))
             logging.info("Wrote to {0}".format(selection))
@@ -427,8 +411,8 @@ class NewState(BaseState):
 
     @transition(Ready)
     def start(self, controller):
-        s = FSMState(label="S{0}".format(next(state_sequence)), x=mousePX, y=mousePY)
-        states.append(s)
+        s = FSMState(label="S{0}".format(next(controller.state_sequence)), x=controller.mousePX, y=controller.mousePY)
+        controller.states.append(s)
         controller.changeState(Ready)
 
 
@@ -479,14 +463,14 @@ class FSMState(object):
         d['size'] = self.size
         return d
 
-    def draw(self):
+    def draw(self, controller):
         stroke(0)
         fill(self.color)
         ellipse(self.x, self.y, self.size, self.size)
         if self.selected:
             strokeWeight(2)
             noFill()
-            stroke(SELECTED_COLOR)
+            stroke(conf_settings.SELECTED_COLOR)
             ellipse(self.x, self.y, self.size+6, self.size+6)
         fill(0)
         if self.edit:
@@ -494,40 +478,8 @@ class FSMState(object):
         else:
             text(self.label, self.x - textWidth(self.label)/2, self.y)
 
-    def is_selected(self):
-        return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
-
-
-def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False, label_offset=0):
-    if selected:
-        strokeWeight(6)
-        stroke(SELECTED_COLOR)
-        fill(0)
-        line(x1, y1, x2, y2)
-        pushMatrix()
-        translate(x2, y2)
-        rotate(atan2(y2-y1, x2-x1))
-        translate(-arrow_offset, 0)
-        stroke(SELECTED_COLOR)
-        fill(SELECTED_COLOR)
-        triangle(4, 0, -12, 7, -12, -7)
-        popMatrix()
-    strokeWeight(2)
-    stroke(0)
-    fill(0)
-    line(x1, y1, x2, y2)
-    pushMatrix()
-    translate(x2, y2)
-    rotate(atan2(y2-y1, x2-x1))
-    pushMatrix()
-    translate(-arrow_offset, 0)
-    stroke(0)
-    fill(0)
-    triangle(0, 0, -10, 5, -10, -5)
-    popMatrix()
-    translate(-sqrt((y2-y1)**2 + (x2-x1)**2)/2.0, 0)
-    text(label, -textWidth(label) / 2, -(TEXT_SIZE * 0.5) - TEXT_SIZE * label_offset)
-    popMatrix()
+    def is_selected(self, controller):
+        return (controller.mousePX - self.x)**2 + (controller.mousePY - self.y)**2 < (self.size/2)**2
 
 
 class FSMTransition(object):
@@ -547,13 +499,13 @@ class FSMTransition(object):
         d['from_state'] = self.from_state.label
         return d
 
-    def is_selected(self):
+    def is_selected(self, controller):
         x1 = self.from_state.x
         y1 = self.from_state.y
         x2 = self.to_state.x
         y2 = self.to_state.y
-        x = mousePX
-        y = mousePY
+        x = controller.mousePX
+        y = controller.mousePY
 
         dx = x2 - x1
         dy = y2 - y1
@@ -597,22 +549,22 @@ class FSMTransition(object):
         if abs(line_atan) < pi/2.0 and pline_atan < 0:
             selected_distance = 10
         elif abs(line_atan) > pi/2.0 and pline_atan < 0:
-            selected_distance = 10 + TEXT_SIZE * (self.label_offset + 1.5)
+            selected_distance = 10 + conf_settings.TEXT_SIZE * (self.label_offset + 1.5)
         elif abs(line_atan) > pi/2.0 and pline_atan > 0:
             selected_distance = 10
         else:
-            selected_distance = 10 + TEXT_SIZE * (self.label_offset + 1.5)
+            selected_distance = 10 + conf_settings.TEXT_SIZE * (self.label_offset + 1.5)
         if distance < selected_distance:
             if application.debug:
-                stroke(SELECTED_COLOR)
+                stroke(conf_settings.SELECTED_COLOR)
                 line(x, y, result_x, result_y)
             return True
         else:
             return False
 
-    def draw(self):
+    def draw(self, controller):
         self.label_offset = 0
-        for t in transitions:
+        for t in controller.transitions:
             if t == self:
                 break
             if t.to_state == self.to_state and t.from_state == self.from_state:
@@ -623,8 +575,8 @@ class FSMTransition(object):
         if self.from_state is not None and self.to_state is None:
             arrow(self.from_state.x,
                   self.from_state.y,
-                  mousePX,
-                  mousePY,
+                  controller.mousePX,
+                  controller.mousePY,
                   0,
                   label,
                   self.selected,
@@ -640,41 +592,23 @@ class FSMTransition(object):
                   self.label_offset)
 
 
-class Wheel(object):
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def get_menu_selection(self):
-        if mouseX < self.x and mouseY < self.y:
-            return "New"
-        elif mouseX > self.x and mouseY > self.y:
-            return "Save"
-        elif mouseX > self.x and mouseY < self.y:
-            return "Load"
-        return None
-
-    def draw(self):
-        if self.x and self.y:
-            noFill()
-            stroke(0)
-            strokeWeight(2)
-            ellipse(self.x, self.y, 100, 100)
-            textSize(TEXT_SIZE)
-            text("New", self.x - 55, self.y - 55)
-            text("Save", self.x + 55, self.y + 55 + TEXT_SIZE)
-            text("Load", self.x + 55, self.y - 55)
-            line(self.x, self.y, self.x + 50, self.y)
-            line(self.x, self.y, self.x - 50, self.y)
-            line(self.x, self.y, self.x, self.y - 50)
-            line(self.x, self.y, self.x, self.y + 50)
-            line(self.x, self.y, mouseX, mouseY)
-
-
 class Application(object):
 
     def __init__(self):
+        self.state_sequence = itertools.count(start=0, step=1)
+        self.states = []
+        self.transitions = []
+        self.panX = 0
+        self.panY = 0
+        self.oldPanX = 0
+        self.oldPanY = 0
+        self.scaleXY = 1
+        self.oldScaleXY = 0
+        self.mousePX = 0
+        self.mousePY = 0
+        self.mousePressedX = 0
+        self.mousePressedY = 0
+        self.lastKeyCode = 0
         self.state = None
         self.wheel = None
         self.selected_state = None
@@ -688,15 +622,15 @@ class Application(object):
         if self.state:
             self.state.start(self)
 
-    def draw(self):
+    def draw(self, controller):
         if self.debug:
             fill(255)
-            textSize(TEXT_SIZE)
+            textSize(conf_settings.TEXT_SIZE)
             xy_t = "xy_t: {0}, {1}".format(mouseX, mouseY)
             text(xy_t,
                  width - 100 - textWidth(xy_t),
                  height - 150)
-            xyp_t = "xyp_t: {0}, {1}".format(mousePX, mousePY)
+            xyp_t = "xyp_t: {0}, {1}".format(controller.mousePX, controller.mousePY)
             text(xyp_t,
                  width - 100 - textWidth(xyp_t),
                  height - 130)
@@ -707,11 +641,11 @@ class Application(object):
             text(fps,
                  width - 100 - textWidth(fps),
                  height - 50)
-            pan = "pan: {0}, {1}".format(int(panX), int(panY))
+            pan = "pan: {0}, {1}".format(int(controller.panX), int(controller.panY))
             text(pan,
                  width - 100 - textWidth(pan),
                  height - 30)
-            scaleXYT = "scale: {0}".format(scaleXY)
+            scaleXYT = "scale: {0}".format(controller.scaleXY)
             text(scaleXYT,
                  width - 100 - textWidth(scaleXYT),
                  height - 10)
@@ -748,6 +682,10 @@ def validate_self():
             print generate_code(missing_states, missing_transitions)
 
 
+def settings():
+    pass
+
+
 def setup():
     global application
     logging.basicConfig(level=logging.DEBUG)
@@ -763,23 +701,22 @@ def setup():
 
 
 def scale_and_pan():
-    scale(scaleXY)
-    translate(panX, panY)
+    scale(application.scaleXY)
+    translate(application.panX, application.panY)
 
 
 def draw():
-    global mousePX, mousePY
-    mousePX = mouseX / scaleXY - panX
-    mousePY = mouseY / scaleXY - panY
+    application.mousePX = mouseX / application.scaleXY - application.panX
+    application.mousePY = mouseY / application.scaleXY - application.panY
     background(102)
     pushMatrix()
     scale_and_pan()
-    for t in transitions:
-        t.draw()
-    for state in states:
-        state.draw()
+    for t in application.transitions:
+        t.draw(application)
+    for state in application.states:
+        state.draw(application)
     popMatrix()
-    application.draw()
+    application.draw(application)
     scale_and_pan()
 
 
