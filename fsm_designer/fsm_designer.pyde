@@ -373,8 +373,8 @@ class Load(BaseState):
                 for state_d in d.get('states', []):
                     label = state_d.get('label') or "S{0}".format(next(state_sequence))
                     state = FSMState(label=label,
-                                     x=state_d.get('x', random.randrange(panX, width*scaleXY + panX)),
-                                     y=state_d.get('y', random.randrange(panY, height*scaleXY + panY)),
+                                     x=state_d.get('x', random.randrange(int(panX), int(width*scaleXY + panX))),
+                                     y=state_d.get('y', random.randrange(int(panY), int(height*scaleXY + panY))),
                                      color=state_d.get('color', 255),
                                      size=state_d.get('size', max(100, textWidth(label) + 20)))
                     new_states.append(state)
@@ -383,7 +383,7 @@ class Load(BaseState):
                     to_state = [s for s in new_states if s.label == transition_d['to_state']]
                     assert len(from_state) == 1, str(from_state)
                     assert len(to_state) == 1, str(to_state)
-                    t = FSMTransition(label=transition_d.get('label'),
+                    t = FSMTransition(label=transition_d.get('label', ''),
                                       to_state=to_state[0],
                                       from_state=from_state[0])
                     new_transitions.append(t)
