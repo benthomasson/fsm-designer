@@ -40,47 +40,47 @@ class BaseState(State):
     def name(self):
         return self.__class__.__name__
 
-    def start(self):
+    def start(self, controller):
         pass
 
-    def end(self):
+    def end(self, controller):
         pass
 
-    def mousePressed(self):
+    def mousePressed(self, controller):
         pass
 
-    def mouseReleased(self):
+    def mouseReleased(self, controller):
         pass
 
-    def mouseDragged(self):
+    def mouseDragged(self, controller):
         pass
 
-    def keyPressed(self):
+    def keyPressed(self, controller):
         pass
 
-    def keyReleased(self):
+    def keyReleased(self, controller):
         pass
 
-    def keyTyped(self):
+    def keyTyped(self, controller):
         pass
 
-    def fileSelected(self, selected):
+    def fileSelected(self, controller, selected):
         pass
 
 
-def select_item():
-    application.selected_state = None
+def select_item(controller):
+    controller.selected_state = None
     for state in states:
-        if state.is_selected() and application.selected_state is None:
+        if state.is_selected() and controller.selected_state is None:
             state.selected = True
-            application.selected_state = state
+            controller.selected_state = state
         else:
             state.selected = False
-    application.selected_transition = None
+    controller.selected_transition = None
     for t in transitions:
-        if t.is_selected() and application.selected_transition is None and application.selected_state is None:
+        if t.is_selected() and controller.selected_transition is None and controller.selected_state is None:
             t.selected = True
-            application.selected_transition = t
+            controller.selected_transition = t
         else:
             t.selected = False
 
@@ -89,8 +89,8 @@ def select_item():
 class Start(BaseState):
 
     @transition('Ready')
-    def start(self):
-        application.changeState(Ready)
+    def start(self, controller):
+        controller.changeState(Ready)
 
 
 @singleton
@@ -100,28 +100,28 @@ class Ready(BaseState):
     @transition('ScaleAndPan')
     @transition('Selected')
     @transition('SelectedTransition')
-    def mousePressed(self):
+    def mousePressed(self, controller):
         if mouseButton == RIGHT:
-            application.changeState(MenuWheel)
+            controller.changeState(MenuWheel)
 
         elif mouseButton == LEFT:
-            select_item()
-            if application.selected_state is not None:
-                application.changeState(Selected)
-            elif application.selected_transition is not None:
-                application.changeState(SelectedTransition)
+            select_item(controller)
+            if controller.selected_state is not None:
+                controller.changeState(Selected)
+            elif controller.selected_transition is not None:
+                controller.changeState(SelectedTransition)
             else:
-                application.changeState(ScaleAndPan)
+                controller.changeState(ScaleAndPan)
 
-    def keyPressed(self):
+    def keyPressed(self, controller):
         global lastKeyCode
         lastKeyCode = keyCode
 
-    def keyTyped(self):
+    def keyTyped(self, controller):
         if key == CODED:
             pass
         elif key == "d":
-            application.debug = not application.debug
+            controller.debug = not controller.debug
 
 
 @singleton
@@ -130,67 +130,67 @@ class SelectedTransition(BaseState):
     @transition('EditTransition')
     @transition('MenuWheel')
     @transition('Ready')
-    def mousePressed(self):
+    def mousePressed(self, controller):
         if mouseButton == RIGHT:
-            if application.selected_transition.is_selected():
-                application.changeState(EditTransition)
+            if controller.selected_transition.is_selected():
+                controller.changeState(EditTransition)
             else:
-                application.selected_transition.selected = False
-                application.selected_transition = None
-                application.changeState(MenuWheel)
+                controller.selected_transition.selected = False
+                controller.selected_transition = None
+                controller.changeState(MenuWheel)
         elif mouseButton == LEFT:
-            if application.selected_transition.is_selected():
+            if controller.selected_transition.is_selected():
                 pass
             else:
-                application.changeState(Ready)
-                application.state.mousePressed()
+                controller.changeState(Ready)
+                controller.state.mousePressed(controller)
 
-    def keyReleased(self):
+    def keyReleased(self, controller):
         if keyCode == 8:
-            application.selected_transition.selected = False
-            transitions.remove(application.selected_transition)
-            application.changeState(Ready)
+            controller.selected_transition.selected = False
+            transitions.remove(controller.selected_transition)
+            controller.changeState(Ready)
 
 
 @singleton
 class EditTransition(BaseState):
 
-    def start(self):
-        application.selected_transition.edit = True
+    def start(self, controller):
+        controller.selected_transition.edit = True
 
-    def end(self):
-        application.selected_transition.edit = False
+    def end(self, controller):
+        controller.selected_transition.edit = False
 
     @transition('SelectedTransition')
     @transition('Ready')
-    def mousePressed(self):
-        if application.selected_transition.is_selected():
-            application.changeState(SelectedTransition)
-            application.state.mousePressed()
+    def mousePressed(self, controller):
+        if controller.selected_transition.is_selected():
+            controller.changeState(SelectedTransition)
+            controller.state.mousePressed(controller)
         else:
-            application.changeState(Ready)
-            application.state.mousePressed()
+            controller.changeState(Ready)
+            controller.state.mousePressed(controller)
 
-    def keyReleased(self):
+    def keyReleased(self, controller):
         if keyCode == 8:
-            application.selected_transition.label = application.selected_transition.label[:-1]
+            controller.selected_transition.label = controller.selected_transition.label[:-1]
 
     @transition('SelectedTransition')
-    def keyTyped(self):
+    def keyTyped(self, controller):
         if key == CODED:
             if keyCode == 8:
-                application.selected_transition.label = application.selected_transition.label[:-1]
+                controller.selected_transition.label = controller.selected_transition.label[:-1]
         else:
             if key == RETURN:
-                application.changeState(SelectedTransition)
+                controller.changeState(SelectedTransition)
             elif key == ENTER:
-                application.changeState(SelectedTransition)
+                controller.changeState(SelectedTransition)
             elif key == BACKSPACE:
-                application.selected_transition.label = application.selected_transition.label[:-1]
+                controller.selected_transition.label = controller.selected_transition.label[:-1]
             elif key == DELETE:
-                application.selected_transition.label = application.selected_transition.label[:-1]
+                controller.selected_transition.label = controller.selected_transition.label[:-1]
             else:
-                application.selected_transition.label += key
+                controller.selected_transition.label += key
 
 
 @singleton
@@ -200,129 +200,129 @@ class Selected(BaseState):
     @transition('Edit')
     @transition('Ready')
     @transition('Move')
-    def mousePressed(self):
+    def mousePressed(self, controller):
         if mouseButton == RIGHT:
-            if application.selected_state.is_selected():
-                application.changeState(Edit)
+            if controller.selected_state.is_selected():
+                controller.changeState(Edit)
             else:
-                application.selected_state.selected = False
-                application.selected_state = None
-                application.changeState(MenuWheel)
+                controller.selected_state.selected = False
+                controller.selected_state = None
+                controller.changeState(MenuWheel)
         elif mouseButton == LEFT:
-            if application.selected_state.is_selected():
-                application.changeState(Move)
+            if controller.selected_state.is_selected():
+                controller.changeState(Move)
             else:
-                application.changeState(Ready)
-                application.state.mousePressed()
+                controller.changeState(Ready)
+                controller.state.mousePressed(controller)
 
     @transition('Move')
     @transition('NewTransition')
-    def mouseDragged(self):
+    def mouseDragged(self, controller):
         if mouseButton == LEFT:
-            application.changeState(Move)
-            application.state.mouseDragged()
+            controller.changeState(Move)
+            controller.state.mouseDragged(controller)
         if mouseButton == RIGHT:
-            application.changeState(NewTransition)
-            application.state.mouseDragged()
+            controller.changeState(NewTransition)
+            controller.state.mouseDragged(controller)
 
-    def keyReleased(self):
+    def keyReleased(self, controller):
         if keyCode == 8:
-            application.selected_state.selected = False
-            states.remove(application.selected_state)
-            application.changeState(Ready)
+            controller.selected_state.selected = False
+            states.remove(controller.selected_state)
+            controller.changeState(Ready)
 
 
 @singleton
 class NewTransition(BaseState):
 
-    def start(self):
-        new_transition = FSMTransition(from_state=application.selected_state, selected=True)
+    def start(self, controller):
+        new_transition = FSMTransition(from_state=controller.selected_state, selected=True)
         transitions.append(new_transition)
-        application.selected_transition = new_transition
+        controller.selected_transition = new_transition
 
-    def end(self):
-        if application.selected_transition is not None and application.selected_transition.to_state is None:
-            transitions.remove(application.selected_transition)
-        application.selected_transition.selected = False
-        application.selected_transition = None
+    def end(self, controller):
+        if controller.selected_transition is not None and controller.selected_transition.to_state is None:
+            transitions.remove(controller.selected_transition)
+        controller.selected_transition.selected = False
+        controller.selected_transition = None
 
     @transition('Selected')
-    def mouseReleased(self):
+    def mouseReleased(self, controller):
         for state in states:
-            if state == application.selected_state:
+            if state == controller.selected_state:
                 continue
             if state.is_selected():
-                application.selected_transition.to_state = state
+                controller.selected_transition.to_state = state
                 break
-        application.changeState(Selected)
+        controller.changeState(Selected)
 
 
 @singleton
 class Move(BaseState):
 
-    def start(self):
+    def start(self, controller):
         global mousePressedX, mousePressedY
 
-    def mouseDragged(self):
-        application.selected_state.x = mousePX
-        application.selected_state.y = mousePY
+    def mouseDragged(self, controller):
+        controller.selected_state.x = mousePX
+        controller.selected_state.y = mousePY
 
     @transition('Selected')
-    def mouseReleased(self):
-        application.changeState(Selected)
+    def mouseReleased(self, controller):
+        controller.changeState(Selected)
 
 
 @singleton
 class Edit(BaseState):
 
-    def start(self):
-        application.selected_state.edit = True
+    def start(self, controller):
+        controller.selected_state.edit = True
 
-    def end(self):
-        application.selected_state.edit = False
+    def end(self, controller):
+        controller.selected_state.edit = False
 
     @transition('NewTransition')
-    def mouseDragged(self):
+    def mouseDragged(self, controller):
         if mouseButton == RIGHT:
-            application.changeState(NewTransition)
-            application.state.mouseDragged()
+            controller.changeState(NewTransition)
+            controller.state.mouseDragged(controller)
 
     @transition('Selected')
     @transition('Ready')
-    def mousePressed(self):
-        if application.selected_state.is_selected():
-            application.changeState(Selected)
-            application.state.mousePressed()
+    def mousePressed(self, controller):
+        if controller.selected_state.is_selected():
+            controller.changeState(Selected)
+            controller.state.mousePressed(controller)
         else:
-            application.changeState(Ready)
-            application.state.mousePressed()
+            controller.changeState(Ready)
+            controller.state.mousePressed(controller)
 
-    def keyReleased(self):
+    def keyReleased(self, controller):
         if keyCode == 8:
-            application.selected_state.label = application.selected_state.label[:-1]
+            controller.selected_state.label = controller.selected_state.label[:-1]
 
     @transition('Selected')
-    def keyTyped(self):
+    def keyTyped(self, controller):
         if key == CODED:
             if keyCode == 8:
-                application.selected_state.label = application.selected_state.label[:-1]
+                controller.selected_state.label = controller.selected_state.label[:-1]
         else:
             if key == RETURN:
-                application.changeState(Selected)
+                controller.changeState(Selected)
             elif key == ENTER:
-                application.changeState(Selected)
+                controller.changeState(Selected)
             elif key == BACKSPACE:
-                application.selected_state.label = application.selected_state.label[:-1]
+                controller.selected_state.label = controller.selected_state.label[:-1]
             elif key == DELETE:
-                application.selected_state.label = application.selected_state.label[:-1]
+                controller.selected_state.label = controller.selected_state.label[:-1]
             else:
-                application.selected_state.label += key
+                controller.selected_state.label += key
 
 
 @singleton
 class ScaleAndPan(BaseState):
 
-    def start(self):
+    def start(self, controller):
         global mousePressedX, mousePressedY, oldPanX, oldPanY, oldScaleXY
         mousePressedX = mouseX
         mousePressedY = mouseY
@@ -330,7 +330,7 @@ class ScaleAndPan(BaseState):
         oldPanY = panY
         oldScaleXY = scaleXY
 
-    def mouseDragged(self):
+    def mouseDragged(self, controller):
         global panX, panY, scaleXY
         if mouseButton == LEFT and lastKeyCode == ALT:
             scaleXY = max(0.1, (mouseY - mousePressedY) / 100.0 + oldScaleXY)
@@ -341,16 +341,16 @@ class ScaleAndPan(BaseState):
             panY = (mouseY - mousePressedY) / scaleXY + oldPanY
 
     @transition('Ready')
-    def mouseReleased(self):
+    def mouseReleased(self, controller):
         global lastKeyCode
         lastKeyCode = 0
-        application.changeState(Ready)
+        controller.changeState(Ready)
 
-    def keyPressed(self):
+    def keyPressed(self, controller):
         global lastKeyCode
         lastKeyCode = keyCode
 
-    def keyReleased(self):
+    def keyReleased(self, controller):
         global lastKeyCode
         lastKeyCode = 0
 
@@ -358,11 +358,11 @@ class ScaleAndPan(BaseState):
 @singleton
 class Load(BaseState):
 
-    def start(self):
+    def start(self, controller):
         selectInput("Input file", "fileSelected")
 
     @transition('Ready')
-    def fileSelected(self, selection):
+    def fileSelected(self, controller, selection):
         global states, transitions, panX, panY, scaleXY
         try:
             if selection:
@@ -394,7 +394,7 @@ class Load(BaseState):
                 states = new_states
                 transitions = new_transitions
             logging.info("Read from {0}".format(selection))
-            application.changeState(Ready)
+            controller.changeState(Ready)
         except Exception:
             logging.error(traceback.format_exc())
 
@@ -402,11 +402,11 @@ class Load(BaseState):
 @singleton
 class Save(BaseState):
 
-    def start(self):
+    def start(self, controller):
         selectOutput("Output file", "fileSelected")
 
     @transition('Ready')
-    def fileSelected(self, selection):
+    def fileSelected(self, controller, selection):
         try:
             if selection:
                 app = {}
@@ -417,7 +417,7 @@ class Save(BaseState):
                 with open(selection.getAbsolutePath(), 'w') as f:
                     f.write(yaml.safe_dump(app, default_flow_style=False))
             logging.info("Wrote to {0}".format(selection))
-            application.changeState(Ready)
+            controller.changeState(Ready)
         except Exception:
             logging.error(traceback.format_exc())
 
@@ -425,39 +425,36 @@ class Save(BaseState):
 @singleton
 class NewState(BaseState):
 
-    def name(self):
-        return "New State!"
-
     @transition(Ready)
-    def start(self):
+    def start(self, controller):
         s = FSMState(label="S{0}".format(next(state_sequence)), x=mousePX, y=mousePY)
         states.append(s)
-        application.changeState(Ready)
+        controller.changeState(Ready)
 
 
 @singleton
 class MenuWheel(BaseState):
 
-    def start(self):
-        application.wheel = Wheel(mouseX, mouseY)
+    def start(self, controller):
+        controller.wheel = Wheel(mouseX, mouseY)
 
-    def end(self):
-        application.wheel = None
+    def end(self, controller):
+        controller.wheel = None
 
     @transition(Ready)
     @transition('Save')
     @transition('Load')
     @transition('NewState')
-    def mouseReleased(self):
-        menu_selection = application.wheel.get_menu_selection()
+    def mouseReleased(self, controller):
+        menu_selection = controller.wheel.get_menu_selection()
         if menu_selection == "New":
-            application.changeState(NewState)
+            controller.changeState(NewState)
         elif menu_selection == "Save":
-            application.changeState(Save)
+            controller.changeState(Save)
         elif menu_selection == "Load":
-            application.changeState(Load)
+            controller.changeState(Load)
         else:
-            application.changeState(Ready)
+            controller.changeState(Ready)
 
 
 class FSMState(object):
@@ -686,10 +683,10 @@ class Application(object):
 
     def changeState(self, state):
         if self.state:
-            self.state.end()
+            self.state.end(self)
         self.state = state
         if self.state:
-            self.state.start()
+            self.state.start(self)
 
     def draw(self):
         if self.debug:
@@ -787,28 +784,28 @@ def draw():
 
 
 def mousePressed():
-    application.state.mousePressed()
+    application.state.mousePressed(application)
 
 
 def mouseDragged():
-    application.state.mouseDragged()
+    application.state.mouseDragged(application)
 
 
 def mouseReleased():
-    application.state.mouseReleased()
+    application.state.mouseReleased(application)
 
 
 def keyPressed():
-    application.state.keyPressed()
+    application.state.keyPressed(application)
 
 
 def keyReleased():
-    application.state.keyReleased()
+    application.state.keyReleased(application)
 
 
 def keyTyped():
-    application.state.keyTyped()
+    application.state.keyTyped(application)
 
 
 def fileSelected(selection):
-    application.state.fileSelected(selection)
+    application.state.fileSelected(application, selection)
