@@ -470,6 +470,7 @@ class FSMState(object):
         self.color = 255
         self.selected = False
         self.edit = False
+        self.label_offset = 0
         self.__dict__.update(kwargs)
 
     def to_dict(self):
@@ -500,7 +501,7 @@ class FSMState(object):
         return (mousePX - self.x)**2 + (mousePY - self.y)**2 < (self.size/2)**2
 
 
-def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False):
+def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False, label_offset=0):
     if selected:
         strokeWeight(6)
         stroke(SELECTED_COLOR)
@@ -528,9 +529,7 @@ def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False):
     triangle(0, 0, -10, 5, -10, -5)
     popMatrix()
     translate(-sqrt((y2-y1)**2 + (x2-x1)**2)/2.0, 0)
-    if abs(atan2(y2-y1, x2-x1)) > 2:
-        rotate(pi)
-    text(label, -textWidth(label) / 2, -TEXT_SIZE * 0.5)
+    text(label, -textWidth(label) / 2, -(TEXT_SIZE * 0.5) - TEXT_SIZE * label_offset)
     popMatrix()
 
 
@@ -585,19 +584,63 @@ class FSMTransition(object):
         dx = x - result_x
         dy = y - result_y
         distance = sqrt(dx*dx + dy*dy)
-        if distance < 10:
+        line_atan = atan2(y2-y1, x2-x1)
+        pline_atan = atan2(result_y-y, result_x-x)
+        if application.debug:
+            logger.debug("%s %s", line_atan, pline_atan)
+            if abs(line_atan) < pi/2.0 and pline_atan < 0:
+                stroke(0)
+            elif abs(line_atan) > pi/2.0 and pline_atan < 0:
+                stroke(255)
+            elif abs(line_atan) > pi/2.0 and pline_atan > 0:
+                stroke(0)
+            else:
+                stroke(255)
+            line(x, y, result_x, result_y)
+        if abs(line_atan) < pi/2.0 and pline_atan < 0:
+            selected_distance = 10
+        elif abs(line_atan) > pi/2.0 and pline_atan < 0:
+            selected_distance = 10 + TEXT_SIZE * (self.label_offset + 1.5)
+        elif abs(line_atan) > pi/2.0 and pline_atan > 0:
+            selected_distance = 10
+        else:
+            selected_distance = 10 + TEXT_SIZE * (self.label_offset + 1.5)
+        if distance < selected_distance:
+            if application.debug:
+                stroke(SELECTED_COLOR)
+                line(x, y, result_x, result_y)
             return True
         else:
             return False
 
     def draw(self):
+        self.label_offset = 0
+        for t in transitions:
+            if t == self:
+                break
+            if t.to_state == self.to_state and t.from_state == self.from_state:
+                self.label_offset += 1
         label = self.label
         if self.edit:
             label = self.label + "_"
         if self.from_state is not None and self.to_state is None:
-            arrow(self.from_state.x, self.from_state.y, mousePX, mousePY, 0, label, self.selected)
+            arrow(self.from_state.x,
+                  self.from_state.y,
+                  mousePX,
+                  mousePY,
+                  0,
+                  label,
+                  self.selected,
+                  self.label_offset)
         if self.from_state is not None and self.to_state is not None:
-            arrow(self.from_state.x, self.from_state.y, self.to_state.x, self.to_state.y, self.to_state.size/2, label, self.selected)
+            arrow(self.from_state.x,
+                  self.from_state.y,
+                  self.to_state.x,
+                  self.to_state.y,
+                  self.to_state.size/2,
+                  label,
+                  self.selected,
+                  self.label_offset)
 
 
 class Wheel(object):
@@ -700,7 +743,6 @@ def validate_self():
         self_yml = to_yaml(sys.modules[__name__], "fsm_designer")
         f.write(self_yml)
 
-
     with open("design.yml") as f:
         design = yaml.load(f.read())
         missing_states, missing_transitions = validate_design(design, sys.modules[__name__], "fsm_designer")
@@ -723,20 +765,25 @@ def setup():
     logging.debug("setup completed")
 
 
+def scale_and_pan():
+    scale(scaleXY)
+    translate(panX, panY)
+
+
 def draw():
     global mousePX, mousePY
     mousePX = mouseX / scaleXY - panX
     mousePY = mouseY / scaleXY - panY
     background(102)
     pushMatrix()
-    scale(scaleXY)
-    translate(panX, panY)
+    scale_and_pan()
     for t in transitions:
         t.draw()
     for state in states:
         state.draw()
     popMatrix()
     application.draw()
+    scale_and_pan()
 
 
 def mousePressed():
