@@ -7,7 +7,6 @@ import yaml
 from models import Application
 
 import os
-import sys
 import logging
 
 from design_fsm import Start
@@ -15,6 +14,13 @@ import design_fsm
 
 
 logger = logging.getLogger("fsm_designer")
+
+class _Module(object):
+
+    pass
+
+
+FakeModule = _Module()
 
 
 page_width = 1024

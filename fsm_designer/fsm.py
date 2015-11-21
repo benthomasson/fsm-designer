@@ -1,8 +1,9 @@
 
 
-import jinja2
 import yaml
 import inspect
+from jinja2 import Environment, PackageLoader
+from conf import settings
 
 
 def singleton(klass):
@@ -62,13 +63,17 @@ def validate_design(design, module, name=None):
     design_transitions = set([tuple(s.items()) for s in design.get('transitions', [])])
     actual_transitions = set([tuple(s.items()) for s in actual.get('transitions', [])])
     missing_transitions = design_transitions - actual_transitions
-
     return missing_states, missing_transitions
+
+
+def analyze_code(module):
+    pass
 
 
 def generate_code(missing_states, missing_transitions):
 
     code = "from fsm import singleton, transition, State"
+    env = Environment(loader=PackageLoader(settings.CODE_TEMPLATE[0], 'templates'))
 
     for state in missing_states:
         state_missing_transitions = [dict(x) for x in missing_transitions if dict(x).get('from_state') == state]
@@ -77,18 +82,7 @@ def generate_code(missing_states, missing_transitions):
             transitions = functions.get(t['label'], [])
             transitions.append(t)
             functions[t['label']] = transitions
-        code += jinja2.Template("""\
-
-
-@singleton
-class {{state}}(State):
-    {%for f_name, transitions in functions %}{%for t in transitions%}
-    @transition('{{t.to_state}}'){%endfor%}
-    def {{f_name}}(self, controller):
-        {%for t in transitions-%}
-        controller.changeState({{t.to_state}})
-        {%endfor%}{%else%}pass
-    {%endfor%}
-""").render(state=state, functions=functions.iteritems())
+        template = env.get_template(settings.CODE_TEMPLATE[1])
+        code += template.render(state=state, functions=functions.iteritems())
 
     return code
