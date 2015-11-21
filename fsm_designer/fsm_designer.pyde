@@ -1,16 +1,16 @@
 
 
-from fsm import to_yaml, validate_design, generate_code
+from fsm_designer.fsm import to_yaml, validate_design, generate_code
 
 import yaml
 
-from models import Application
+from fsm_designer.models import Application
 
 import os
 import logging
 
-from design_fsm import Start
-import design_fsm
+from fsm_designer.design_fsm import Start
+import fsm_designer.design_fsm as design_fsm
 
 
 logger = logging.getLogger("fsm_designer")
