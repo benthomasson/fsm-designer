@@ -5,9 +5,9 @@ import traceback
 import logging
 import yaml
 
-from fsm import State, transition, singleton
-from widgets import Wheel
-from models import FSMState, FSMTransition
+from fsm_designer.fsm import State, transition, singleton
+from fsm_designer.widgets import Wheel
+from fsm_designer.models import FSMState, FSMTransition
 
 
 logger = logging.getLogger("fsm_designer.design_fsm")
