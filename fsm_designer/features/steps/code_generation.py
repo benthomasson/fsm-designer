@@ -19,13 +19,6 @@ def cd(directory):
     os.chdir(current_directory)
 
 
-@contextmanager
-def tempdir():
-    tempdir = tempfile.mkdtemp()
-    yield tempdir
-    shutil.rmtree(tempdir)
-
-
 @given(u'a fsm design')
 def step_impl1(context):
     context.design = os.path.abspath(resource_filename('fsm_designer', '../features/steps/designs/simple.yml'))
@@ -33,13 +26,13 @@ def step_impl1(context):
 
 @when(u'generating code')
 def step_impl2(context):
+    context.tempdir = tempfile.mkdtemp()
     try:
-        with tempdir() as tmp:
-            with cd(tmp):
-                fsm_designer.cli.main('generate {0} output.py'.format(context.design).split())
-                assert os.path.exists('output.py'), 'No code generated'
-                with open('output.py') as f:
-                    context.generated_code = f.read()
+        with cd(context.tempdir):
+            fsm_designer.cli.main('generate {0} output.py'.format(context.design).split())
+            assert os.path.exists('output.py'), 'No code generated'
+            with open('output.py') as f:
+                context.generated_code = f.read()
     except SystemExit:
         raise AssertionError('SystemExit')
 
