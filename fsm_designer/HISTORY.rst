@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.0 (2015-01-11)
+0.1.0 (2015-11-22)
 ---------------------
 
-* First release on PyPI.
+* First release with processing sketch and CLI
