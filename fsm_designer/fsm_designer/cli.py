@@ -4,6 +4,7 @@ Usage:
     fsm-designer [options] generate <fsm-design> <output-module>
     fsm-designer [options] validate <fsm-design> <module>
     fsm-designer [options] extract <module> <output-fsm-design>
+    fsm-designer [options] analyze <module>
 
 Generate and validate an FSM implementation based on a FSM diagram.
 
@@ -21,6 +22,8 @@ import sys
 import yaml
 
 from fsm import validate_design, generate_code, to_yaml
+from analysis import AnalysisVisitor
+import ast
 
 import logging
 logger = logging.getLogger('fsm_designer.cli')
@@ -70,6 +73,16 @@ def extract(module_name, output_fsm_design):
         f.write(to_yaml(module))
 
 
+def analyze(module_name):
+    module = _load_module(module_name)
+    module_file = module.__file__
+    if module_file.endswith(".pyc"):
+        module_file = module_file[:-1]
+    with open(module_file) as f:
+        module_ast = ast.parse(f.read())
+    AnalysisVisitor().visit(module_ast)
+
+
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
@@ -95,3 +108,5 @@ def main(args=None):
             return 1
     elif parsed_args['extract']:
         extract(parsed_args['<module>'], parsed_args['<output-fsm-design>'])
+    elif parsed_args['analyze']:
+        analyze(parsed_args['<module>'])
