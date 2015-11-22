@@ -28,6 +28,9 @@ logger = logging.getLogger('fsm_designer.cli')
 
 class Module(object):
 
+    class State(object):
+        pass
+
     def __init__(self, name):
         self.__name__ = name
 

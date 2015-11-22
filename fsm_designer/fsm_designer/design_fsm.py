@@ -5,12 +5,40 @@ import traceback
 import logging
 import yaml
 
-from fsm_designer.fsm import State, transition, singleton
 from fsm_designer.widgets import Wheel
 from fsm_designer.models import FSMState, FSMTransition
 
 
 logger = logging.getLogger("fsm_designer.design_fsm")
+
+
+def singleton(klass):
+    return klass()
+
+
+def transition(new_state):
+    def called_on(fn):
+        transitions = getattr(fn, 'state_transitions', [])
+        if isinstance(new_state, basestring):
+            transitions.append(new_state)
+        elif isinstance(new_state, type):
+            transitions.append(new_state.__name__)
+        elif isinstance(type(new_state), type):
+            transitions.append(new_state.__class__.__name__)
+        else:
+            raise Exception('Unsupported type {0}'.format(new_state))
+        setattr(fn, 'state_transitions', transitions)
+        return fn
+    return called_on
+
+
+class State(object):
+
+    def start(self, controller):
+        pass
+
+    def end(self, controller):
+        pass
 
 
 class BaseState(State):

@@ -1,0 +1,20 @@
+app: simple
+states:
+- color: 255
+  label: S0
+  size: 100
+  x: 299
+  y: 354
+- color: 255
+  label: S1
+  size: 100
+  x: 623
+  y: 350
+transitions:
+- from_state: S0
+  label: hello
+  to_state: S1
+view:
+  panX: 0
+  panY: 0
+  scaleXY: 1

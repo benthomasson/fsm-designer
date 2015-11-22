@@ -9,41 +9,20 @@ import logging
 
 logger = logging.getLogger('fsm_designer.fsm')
 
-def singleton(klass):
-    return klass()
 
-
-def transition(new_state):
-    def called_on(fn):
-        transitions = getattr(fn, 'state_transitions', [])
-        if isinstance(new_state, basestring):
-            transitions.append(new_state)
-        elif isinstance(new_state, State):
-            transitions.append(new_state.__class__.__name__)
-        else:
-            transitions.append(new_state.__name__)
-        setattr(fn, 'state_transitions', transitions)
-        return fn
-    return called_on
-
-
-class State(object):
-
-    pass
-
-
-def to_fsm_dict(module, name=None):
+def to_fsm_dict(module, name=None, state_base_class_name='State'):
     logger.debug("to_fsm_dict %s %s", module, name)
     states = []
     transitions = []
-    fsm = dict(name=name or module.__name__, states=states, transitions=transitions)
+    fsm = dict(app=name or module.__name__, states=states, transitions=transitions)
+    state_base_class = getattr(module, state_base_class_name)
     for key in dir(module):
         value = getattr(module, key)
         logger.debug("key %s", key)
-        logger.debug("isinstance State %s",  isinstance(value, State))
-        if isinstance(value, State):
+        logger.debug("isinstance %s %s", state_base_class, isinstance(value, state_base_class))
+        if isinstance(value, state_base_class):
             state_class = value.__class__
-        elif type(value) == type and issubclass(value, State) and value is not State:
+        elif type(value) == type and issubclass(value, state_base_class) and value is not state_base_class:
             state_class = value
         else:
             continue
@@ -57,13 +36,13 @@ def to_fsm_dict(module, name=None):
     return fsm
 
 
-def to_yaml(module, name=None):
-    fsm = to_fsm_dict(module, name)
+def to_yaml(module, name=None, state_base_class_name='State'):
+    fsm = to_fsm_dict(module, name, state_base_class_name)
     return yaml.dump(fsm, default_flow_style=False)
 
 
-def validate_design(design, module, name=None):
-    actual = to_fsm_dict(module, name)
+def validate_design(design, module, name=None, state_base_class_name='State'):
+    actual = to_fsm_dict(module, name, state_base_class_name)
     design_states = set([s.get('label', '') for s in design.get('states', [])])
     logger.debug("design_states %s", design_states)
     actual_states = set([s.get('label', '') for s in actual.get('states', [])])
@@ -79,14 +58,12 @@ def validate_design(design, module, name=None):
     return missing_states, missing_transitions
 
 
-def analyze_code(module):
-    pass
-
-
 def generate_code(missing_states, missing_transitions):
 
-    code = "from fsm_designer.fsm import singleton, transition, State"
     env = Environment(loader=PackageLoader(settings.CODE_TEMPLATE[0], 'templates'))
+    template = env.get_template(settings.CODE_TEMPLATE[1])
+
+    states = []
 
     for state in missing_states:
         state_missing_transitions = [dict(x) for x in missing_transitions if dict(x).get('from_state') == state]
@@ -95,7 +72,6 @@ def generate_code(missing_states, missing_transitions):
             transitions = functions.get(t['label'], [])
             transitions.append(t)
             functions[t['label']] = transitions
-        template = env.get_template(settings.CODE_TEMPLATE[1])
-        code += template.render(state=state, functions=functions.iteritems())
+        states.append((state, functions.items()))
 
-    return code
+    return template.render(states=states)
