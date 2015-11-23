@@ -1,4 +1,4 @@
-name: fsm_designer
+app: fsm_designer
 states:
 - label: BaseState
 - label: Edit
