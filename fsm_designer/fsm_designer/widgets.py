@@ -1,8 +1,65 @@
 
 
-from math import sqrt
+from math import sqrt, pi
 
 from conf import settings
+
+
+class MagnifyingGlassMousePointer(object):
+
+    def __init__(self, size=20, color="#5A5A5A"):
+        self.size = size
+        self.color = color
+
+    def draw(self):
+        x = mouseX
+        y = mouseY
+        strokeWeight(2)
+        noFill()
+        stroke(self.color)
+        ellipse(x, y, self.size, self.size)
+        pushMatrix()
+        translate(x, y)
+        rotate(pi / 4)
+        translate(self.size / 2, 0)
+        line(self.size / 2, 0, 0, 0)
+        popMatrix()
+        pushMatrix()
+        translate(x, y)
+        rotate(pi / 2)
+        for r in xrange(2):
+            rotate(pi)
+            pushMatrix()
+            translate(self.size, 0)
+            line(self.size / 2, 0, 0, 0)
+            translate(self.size / 2, 0)
+            triangle(0, 0, -4, 2, -4, -2)
+            popMatrix()
+        popMatrix()
+
+
+class MoveMousePointer(object):
+
+    def __init__(self, size=20, color="#5A5A5A"):
+        self.size = size
+        self.color = color
+
+    def draw(self):
+        x = mouseX
+        y = mouseY
+        strokeWeight(2)
+        stroke(self.color)
+        pushMatrix()
+        translate(x, y)
+        for r in xrange(4):
+            rotate(pi / 2)
+            line(self.size / 2, 0, 0, 0)
+            pushMatrix()
+            translate(self.size / 2, 0)
+            fill(self.color)
+            triangle(0, 0, -4, 2, -4, -2)
+            popMatrix()
+        popMatrix()
 
 
 def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False, label_offset=0):
@@ -20,7 +77,7 @@ def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False, label_offset=0
         triangle(4, 0, -12, 7, -12, -7)
         popMatrix()
     strokeWeight(2)
-    stroke(0)
+    stroke(settings.COLOR)
     fill(0)
     line(x1, y1, x2, y2)
     pushMatrix()
@@ -28,7 +85,7 @@ def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False, label_offset=0
     rotate(atan2(y2-y1, x2-x1))
     pushMatrix()
     translate(-arrow_offset, 0)
-    stroke(0)
+    stroke(settings.COLOR)
     fill(0)
     triangle(0, 0, -10, 5, -10, -5)
     popMatrix()
@@ -55,9 +112,10 @@ class Wheel(object):
     def draw(self):
         if self.x and self.y:
             noFill()
-            stroke(0)
+            stroke(settings.COLOR)
             strokeWeight(2)
             ellipse(self.x, self.y, 100, 100)
+            fill(0)
             textSize(settings.TEXT_SIZE)
             text("New", self.x - 55, self.y - 55)
             text("Save", self.x + 55, self.y + 55 + settings.TEXT_SIZE)

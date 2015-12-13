@@ -5,7 +5,7 @@ import traceback
 import logging
 import yaml
 
-from fsm_designer.widgets import Wheel
+from fsm_designer.widgets import Wheel, MagnifyingGlassMousePointer, MoveMousePointer
 from fsm_designer.models import FSMState, FSMTransition
 
 
@@ -150,6 +150,7 @@ class SelectedTransition(BaseState):
                 controller.changeState(Ready)
                 controller.state.mousePressed(controller)
 
+    @transition('Ready')
     def keyReleased(self, controller):
         if keyCode == 8:
             controller.selected_transition.selected = False
@@ -230,6 +231,7 @@ class Selected(BaseState):
             controller.changeState(NewTransition)
             controller.state.mouseDragged(controller)
 
+    @transition('Ready')
     def keyReleased(self, controller):
         if keyCode == 8:
             controller.selected_state.selected = False
@@ -334,10 +336,17 @@ class ScaleAndPan(BaseState):
         controller.oldPanX = controller.panX
         controller.oldPanY = controller.panY
         controller.oldScaleXY = controller.scaleXY
+        if controller.lastKeyCode == ALT:
+            controller.mouse_pointer = MagnifyingGlassMousePointer()
+        else:
+            controller.mouse_pointer = MoveMousePointer()
+
+    def end(self, controller):
+        controller.mouse_pointer = None
 
     def mouseDragged(self, controller):
         if mouseButton == LEFT and controller.lastKeyCode == ALT:
-            controller.scaleXY = max(0.1, (mouseY - controller.mousePressedY) / 100.0 + controller.oldScaleXY)
+            controller.scaleXY = max(0.1, (controller.mousePressedY - mouseY) / 100.0 + controller.oldScaleXY)
             controller.panX = controller.oldPanX + (-1 * controller.mousePressedX / controller.oldScaleXY) + (controller.mousePressedX / controller.scaleXY)
             controller.panY = controller.oldPanY + (-1 * controller.mousePressedY / controller.oldScaleXY) + (controller.mousePressedY / controller.scaleXY)
         elif mouseButton == LEFT:
@@ -347,13 +356,17 @@ class ScaleAndPan(BaseState):
     @transition('Ready')
     def mouseReleased(self, controller):
         controller.lastKeyCode = 0
+        controller.mouse_pointer = None
         controller.changeState(Ready)
 
     def keyPressed(self, controller):
         controller.lastKeyCode = keyCode
+        if controller.lastKeyCode == ALT:
+            controller.mouse_pointer = MagnifyingGlassMousePointer()
 
     def keyReleased(self, controller):
         controller.lastKeyCode = 0
+        controller.mouse_pointer = MoveMousePointer()
 
 
 @singleton

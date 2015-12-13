@@ -72,9 +72,10 @@ def scale_and_pan():
 
 
 def draw():
+    clear()
     application.mousePX = mouseX / application.scaleXY - application.panX
     application.mousePY = mouseY / application.scaleXY - application.panY
-    background(102)
+    background(255)
     pushMatrix()
     scale_and_pan()
     for t in application.transitions:
@@ -99,10 +100,12 @@ def mouseReleased():
 
 
 def keyPressed():
+    application.lastKeyCode = keyCode
     application.state.keyPressed(application)
 
 
 def keyReleased():
+    application.lastKeyCode = 0
     application.state.keyReleased(application)
 
 

@@ -17,7 +17,6 @@ class FSMState(object):
         self.y = 0
         self.label = ""
         self.size = 100
-        self.color = 255
         self.selected = False
         self.edit = False
         self.label_offset = 0
@@ -28,20 +27,19 @@ class FSMState(object):
         d['label'] = self.label
         d['x'] = self.x
         d['y'] = self.y
-        d['color'] = self.color
         d['size'] = self.size
         return d
 
     def draw(self, controller):
-        stroke(0)
-        fill(self.color)
+        stroke(settings.COLOR)
+        fill(settings.FILL)
         ellipse(self.x, self.y, self.size, self.size)
         if self.selected:
             strokeWeight(2)
-            noFill()
             stroke(settings.SELECTED_COLOR)
+            fill(settings.FILL)
             ellipse(self.x, self.y, self.size+6, self.size+6)
-        fill(0)
+        fill(settings.COLOR)
         if self.edit:
             text(self.label + "_", self.x - textWidth(self.label + "_")/2, self.y)
         else:
@@ -107,11 +105,11 @@ class FSMTransition(object):
         if controller.debug:
             logger.debug("%s %s", line_atan, pline_atan)
             if abs(line_atan) < pi/2.0 and pline_atan < 0:
-                stroke(0)
+                stroke(settings.COLOR)
             elif abs(line_atan) > pi/2.0 and pline_atan < 0:
                 stroke(255)
             elif abs(line_atan) > pi/2.0 and pline_atan > 0:
-                stroke(0)
+                stroke(settings.COLOR)
             else:
                 stroke(255)
             line(x, y, result_x, result_y)
@@ -183,6 +181,7 @@ class Application(object):
         self.selected_state = None
         self.selected_transition = None
         self.debug = False
+        self.mouse_pointer = None
 
     def changeState(self, state):
         if self.state:
@@ -193,7 +192,7 @@ class Application(object):
 
     def draw(self, controller):
         if self.debug:
-            fill(255)
+            fill(0)
             textSize(settings.TEXT_SIZE)
             xy_t = "xy_t: {0}, {1}".format(mouseX, mouseY)
             text(xy_t,
@@ -233,3 +232,6 @@ class Application(object):
 
         if self.wheel:
             self.wheel.draw()
+
+        if self.mouse_pointer:
+            self.mouse_pointer.draw()

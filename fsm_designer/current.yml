@@ -79,6 +79,9 @@ transitions:
   label: mouseReleased
   to_state: Ready
 - from_state: Selected
+  label: keyReleased
+  to_state: Ready
+- from_state: Selected
   label: mouseDragged
   to_state: NewTransition
 - from_state: Selected
@@ -96,6 +99,9 @@ transitions:
 - from_state: Selected
   label: mousePressed
   to_state: MenuWheel
+- from_state: SelectedTransition
+  label: keyReleased
+  to_state: Ready
 - from_state: SelectedTransition
   label: mousePressed
   to_state: Ready
