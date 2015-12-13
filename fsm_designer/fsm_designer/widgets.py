@@ -90,6 +90,7 @@ def arrow(x1, y1, x2, y2, arrow_offset, label="", selected=False, label_offset=0
     triangle(0, 0, -10, 5, -10, -5)
     popMatrix()
     translate(-sqrt((y2-y1)**2 + (x2-x1)**2)/2.0, 0)
+    textSize(settings.TEXT_SIZE)
     text(label, -textWidth(label) / 2, -(settings.TEXT_SIZE * 0.5) - settings.TEXT_SIZE * label_offset)
     popMatrix()
 

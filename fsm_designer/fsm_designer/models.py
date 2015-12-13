@@ -5,6 +5,7 @@ import itertools
 
 from conf import settings
 from widgets import arrow
+from processing_widgets.widgets import Button, ButtonBar
 
 
 logger = logging.getLogger("fsm_designer.models")
@@ -40,6 +41,7 @@ class FSMState(object):
             fill(settings.FILL)
             ellipse(self.x, self.y, self.size+6, self.size+6)
         fill(settings.COLOR)
+        textSize(settings.TEXT_SIZE)
         if self.edit:
             text(self.label + "_", self.x - textWidth(self.label + "_")/2, self.y)
         else:
@@ -182,6 +184,20 @@ class Application(object):
         self.selected_transition = None
         self.debug = False
         self.mouse_pointer = None
+        self.active_widgets = []
+        self.active_widgets.append(Button(x=0, y=0, label="Save", call_back=self.save))
+        self.active_widgets.append(Button(x=0, y=0, label="Load", call_back=self.load))
+        self.button_bar = ButtonBar(self.active_widgets, 10, 10)
+
+    def save(self, button):
+        print button
+        from design_fsm import Save
+        self.changeState(Save)
+
+    def load(self, button):
+        print button
+        from design_fsm import Load
+        self.changeState(Load)
 
     def changeState(self, state):
         if self.state:
@@ -232,6 +248,8 @@ class Application(object):
 
         if self.wheel:
             self.wheel.draw()
+
+        self.button_bar.draw()
 
         if self.mouse_pointer:
             self.mouse_pointer.draw()

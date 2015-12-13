@@ -7,6 +7,7 @@ import yaml
 
 from fsm_designer.widgets import Wheel, MagnifyingGlassMousePointer, MoveMousePointer
 from fsm_designer.models import FSMState, FSMTransition
+from conf import settings
 
 
 logger = logging.getLogger("fsm_designer.design_fsm")
@@ -385,6 +386,7 @@ class Load(BaseState):
                     d = yaml.load(f.read())
                 for state_d in d.get('states', []):
                     label = state_d.get('label') or "S{0}".format(next(controller.state_sequence))
+                    textSize(settings.TEXT_SIZE)
                     state = FSMState(label=label,
                                      x=state_d.get('x', random.randrange(int(controller.panX), int(width*controller.scaleXY + controller.panX))),
                                      y=state_d.get('y', random.randrange(int(controller.panY), int(height*controller.scaleXY + controller.panY))),

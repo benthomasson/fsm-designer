@@ -15,6 +15,7 @@ import fsm_designer.design_fsm as design_fsm
 
 logger = logging.getLogger("fsm_designer")
 
+
 class _Module(object):
 
     pass
@@ -83,11 +84,27 @@ def draw():
     for state in application.states:
         state.draw(application)
     popMatrix()
+    for widget in application.active_widgets:
+        if (mouseX > widget.left_extent and
+                mouseX < widget.right_extent and
+                mouseY > widget.top_extent and
+                mouseY < widget.bottom_extent):
+            widget.mouseOver()
+        else:
+            widget.mouseOut()
+            widget.mouseReleased()
     application.draw(application)
     scale_and_pan()
 
 
 def mousePressed():
+    for widget in application.active_widgets:
+        if (mouseX > widget.left_extent and
+                mouseX < widget.right_extent and
+                mouseY > widget.top_extent and
+                mouseY < widget.bottom_extent):
+            widget.mousePressed()
+            return
     application.state.mousePressed(application)
 
 
@@ -97,6 +114,12 @@ def mouseDragged():
 
 def mouseReleased():
     application.state.mouseReleased(application)
+    for widget in application.active_widgets:
+        if (mouseX > widget.left_extent and
+                mouseX < widget.right_extent and
+                mouseY > widget.top_extent and
+                mouseY < widget.bottom_extent):
+            widget.mouseReleased()
 
 
 def keyPressed():
