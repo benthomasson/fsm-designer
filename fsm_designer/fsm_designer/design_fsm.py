@@ -384,6 +384,9 @@ class Load(BaseState):
                 new_transitions = []
                 with open(selection.getAbsolutePath()) as f:
                     d = yaml.load(f.read())
+                controller.model = selection.getAbsolutePath()
+                controller.app = d.get('app', os.path.splitext(os.path.basename(selection.getAbsolutePath()))[0])
+                controller.directory = os.path.dirname(selection.getAbsolutePath())
                 for state_d in d.get('states', []):
                     label = state_d.get('label') or "S{0}".format(next(controller.state_sequence))
                     textSize(settings.TEXT_SIZE)
@@ -425,7 +428,7 @@ class Save(BaseState):
         try:
             if selection:
                 app = {}
-                app['app'] = os.path.splitext(os.path.basename(selection.getAbsolutePath()))[0]
+                app['app'] = controller.app or os.path.splitext(os.path.basename(selection.getAbsolutePath()))[0]
                 app['view'] = dict(panX=controller.panX, panY=controller.panY, scaleXY=controller.scaleXY)
                 app['states'] = [s.to_dict() for s in controller.states]
                 app['transitions'] = [t.to_dict() for t in controller.transitions]

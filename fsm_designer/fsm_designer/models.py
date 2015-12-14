@@ -7,6 +7,8 @@ from conf import settings
 from widgets import arrow
 from processing_widgets.widgets import Button, ButtonBar
 
+from subprocess import Popen, PIPE
+
 
 logger = logging.getLogger("fsm_designer.models")
 
@@ -185,8 +187,13 @@ class Application(object):
         self.debug = False
         self.mouse_pointer = None
         self.active_widgets = []
+        self.model = None
+        self.app = None
+        self.directory = None
         self.active_widgets.append(Button(x=0, y=0, label="Save", call_back=self.save))
         self.active_widgets.append(Button(x=0, y=0, label="Load", call_back=self.load))
+        self.active_widgets.append(Button(x=0, y=0, label="Generate", call_back=self.generate))
+        self.active_widgets.append(Button(x=0, y=0, label="Validate", call_back=self.validate))
         self.button_bar = ButtonBar(self.active_widgets, 10, 10)
 
     def save(self, button):
@@ -198,6 +205,20 @@ class Application(object):
         print button
         from design_fsm import Load
         self.changeState(Load)
+
+    def generate(self, button):
+        p = Popen("fsm-designer generate -d {0} {1}.py".format(self.model, self.app), shell=True, stdout=PIPE, cwd=self.directory)
+        stdout, stderr = p.communicate()
+        print stderr
+        print stdout
+        print p.returncode
+
+    def validate(self, button):
+        p = Popen("fsm-designer validate -d {0} {1}".format(self.model, self.app), shell=True, stdout=PIPE, cwd=self.directory)
+        stdout, stderr = p.communicate()
+        print stderr
+        print stdout
+        print p.returncode
 
     def changeState(self, state):
         if self.state:
