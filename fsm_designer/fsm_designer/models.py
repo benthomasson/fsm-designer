@@ -7,7 +7,7 @@ from conf import settings
 from widgets import arrow
 from processing_widgets.widgets import Button, ButtonBar
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 
 
 logger = logging.getLogger("fsm_designer.models")
@@ -207,14 +207,16 @@ class Application(object):
         self.changeState(Load)
 
     def generate(self, button):
-        p = Popen("fsm-designer generate -d {0} {1}.py".format(self.model, self.app), shell=True, stdout=PIPE, cwd=self.directory)
+        p = Popen("fsm-designer generate -d {0} {1}.py".format(self.model, self.app),
+                  shell=True, stdout=PIPE, stderr=STDOUT, cwd=self.directory)
         stdout, stderr = p.communicate()
         print stderr
         print stdout
         print p.returncode
 
     def validate(self, button):
-        p = Popen("fsm-designer validate -d {0} {1}".format(self.model, self.app), shell=True, stdout=PIPE, cwd=self.directory)
+        p = Popen("fsm-designer validate -d {0} {1}".format(self.model, self.app),
+                  shell=True, stdout=PIPE, stderr=STDOUT, cwd=self.directory)
         stdout, stderr = p.communicate()
         print stderr
         print stdout
