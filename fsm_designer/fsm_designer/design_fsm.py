@@ -139,14 +139,14 @@ class SelectedTransition(BaseState):
     def mousePressed(self, controller):
         if mouseButton == RIGHT:
             if controller.selected_transition.is_selected(controller):
-                controller.changeState(EditTransition)
+                pass
             else:
                 controller.selected_transition.selected = False
                 controller.selected_transition = None
                 controller.changeState(MenuWheel)
         elif mouseButton == LEFT:
             if controller.selected_transition.is_selected(controller):
-                pass
+                controller.changeState(EditTransition)
             else:
                 controller.changeState(Ready)
                 controller.state.mousePressed(controller)
@@ -210,14 +210,14 @@ class Selected(BaseState):
     def mousePressed(self, controller):
         if mouseButton == RIGHT:
             if controller.selected_state.is_selected(controller):
-                controller.changeState(Edit)
+                pass
             else:
                 controller.selected_state.selected = False
                 controller.selected_state = None
                 controller.changeState(MenuWheel)
         elif mouseButton == LEFT:
             if controller.selected_state.is_selected(controller):
-                controller.changeState(Move)
+                controller.changeState(Edit)
             else:
                 controller.changeState(Ready)
                 controller.state.mousePressed(controller)
