@@ -1,7 +1,8 @@
 '''
 
 Usage:
-    fsm-designer [options] generate <fsm-design> <output-module>
+    fsm-designer [options] generate-py <fsm-design> <output-module>
+    fsm-designer [options] generate-js <fsm-design> <output-module>
     fsm-designer [options] validate <fsm-design> <module>
     fsm-designer [options] extract <module> <output-fsm-design>
 
@@ -35,11 +36,11 @@ class Module(object):
         self.__name__ = name
 
 
-def generate(fsm_design, output_module):
+def generate(code_template, fsm_design, output_module):
     module_name = os.path.splitext(os.path.basename(output_module))[0]
     with open(fsm_design) as f:
         missing_states, missing_transitions = validate_design(yaml.load(f.read()), Module(module_name))
-    code = generate_code(missing_states, missing_transitions)
+    code = generate_code(code_template, missing_states, missing_transitions)
     with open(output_module, 'w') as f:
         f.write(code)
 
@@ -89,8 +90,10 @@ def main(args=None):
     logger.debug("sys.argv %s", sys.argv)
     logger.debug("parsed_args %s", parsed_args)
 
-    if parsed_args['generate']:
-        generate(parsed_args['<fsm-design>'], parsed_args['<output-module>'])
+    if parsed_args['generate-py']:
+        generate("fsm.pyt", parsed_args['<fsm-design>'], parsed_args['<output-module>'])
+    if parsed_args['generate-js']:
+        generate("fsm.jst", parsed_args['<fsm-design>'], parsed_args['<output-module>'])
     elif parsed_args['validate']:
         if validate(parsed_args['<fsm-design>'], parsed_args['<module>']):
             return 0

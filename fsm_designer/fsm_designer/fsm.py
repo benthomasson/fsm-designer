@@ -58,10 +58,10 @@ def validate_design(design, module, name=None, state_base_class_name='State'):
     return missing_states, missing_transitions
 
 
-def generate_code(missing_states, missing_transitions):
+def generate_code(code_template, missing_states, missing_transitions):
 
-    env = Environment(loader=PackageLoader(settings.CODE_TEMPLATE[0], 'templates'))
-    template = env.get_template(settings.CODE_TEMPLATE[1])
+    env = Environment(loader=PackageLoader(*settings.TEMPLATES_PATH))
+    template = env.get_template(code_template)
 
     states = []
 

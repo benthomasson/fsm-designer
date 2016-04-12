@@ -1,0 +1,33 @@
+
+function Controller () {
+    this.state = null
+
+}
+exports.Controller = Controller
+
+Controller.prototype.changeState = function(state) {
+    if (this.state != null) {
+        this.state.end(this)
+    }
+    this.state = state
+    if (this.state != null) {
+        this.state.start(this)
+    }
+}
+{%for state, functions in states%}
+function {{state}} () {
+}
+exports.{{state}} = {{state}}
+{%for f_name, transitions in functions %}{%for t in transitions%}
+{{state}}.prototype.start = function (controller) {
+}
+{{state}}.prototype.end = function (controller) {
+}
+// transition to {{t.to_state}}{%endfor%}
+{{state}}.prototype.{{f_name}} = function (controller) {
+{%for t in transitions%}
+    controller.changeState({{t.to_state}})
+{%endfor%}}
+{%endfor%}
+{%endfor%}
+
