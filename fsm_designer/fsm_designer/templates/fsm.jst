@@ -1,3 +1,4 @@
+var inherits= require('inherits')
 
 function Controller () {
     this.state = null
@@ -6,6 +7,7 @@ function Controller () {
 exports.Controller = Controller
 
 Controller.prototype.changeState = function(state) {
+    console.log('changeState: ' + state.constructor.name);
     if (this.state != null) {
         this.state.end(this)
     }
@@ -14,20 +16,27 @@ Controller.prototype.changeState = function(state) {
         this.state.start(this)
     }
 }
+function _State () {
+    _State.prototype.start = function (controller) {
+    }
+    _State.prototype.end = function (controller) {
+    }
+}
+var State = new _State()
+exports.State = State
+exports._State = _State
 {%for state, functions in states%}
-function {{state}} () {
+function _{{state}} () {
 }
-exports.{{state}} = {{state}}
+inherits(_{{state}}, _State)
 {%for f_name, transitions in functions %}{%for t in transitions%}
-{{state}}.prototype.start = function (controller) {
-}
-{{state}}.prototype.end = function (controller) {
-}
 // transition to {{t.to_state}}{%endfor%}
-{{state}}.prototype.{{f_name}} = function (controller) {
+_{{state}}.prototype.{{f_name}} = function (controller) {
 {%for t in transitions%}
     controller.changeState({{t.to_state}})
 {%endfor%}}
+var {{state}} = new _{{state}}()
+exports.{{state}} = {{state}}
 {%endfor%}
 {%endfor%}
 
