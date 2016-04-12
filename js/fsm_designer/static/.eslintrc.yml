@@ -1,0 +1,31 @@
+extends: standard
+plugins:
+  - standard
+globals:
+    io: true
+    fill: true
+    background: true
+    text: true
+    frameRate: true
+    rect: true
+    stroke: true
+    strokeWeight: true
+    key: true
+    keyCode: true
+    mouseX: true
+    mouseY: true
+    windowWidth: true
+    windowHeight: true
+    resizeCanvas: true
+    createCanvas: true
+    scale: true
+    translate: true
+    mouseWheel: true
+    color: true
+    noStroke: true
+    TOP: true
+    LEFT: true
+    textAlign: true
+    textSize: true
+rules:
+    indent: ["error", 4]
