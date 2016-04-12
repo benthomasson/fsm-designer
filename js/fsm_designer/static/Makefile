@@ -1,5 +1,5 @@
 
-.PHONY: all
+.PHONY: all generate lint
 
 
 all:
@@ -7,3 +7,6 @@ all:
 
 generate:
 	fsm-designer generate-js ../../../fsm_designer/fsm_designer/design_fsm.yml fsm.js
+
+lint:
+	eslint fsm.js

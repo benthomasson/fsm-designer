@@ -1,4 +1,4 @@
-var inherits= require('inherits')
+var inherits = require('inherits')
 
 function Controller () {
     this.state = null
@@ -6,8 +6,8 @@ function Controller () {
 }
 exports.Controller = Controller
 
-Controller.prototype.changeState = function(state) {
-    console.log('changeState: ' + state.constructor.name);
+Controller.prototype.changeState = function (state) {
+    console.log('changeState: ' + state.constructor.name)
     if (this.state != null) {
         this.state.end(this)
     }
@@ -35,9 +35,9 @@ _Load.prototype.fileSelected = function (controller) {
 
     controller.changeState(Ready)
 }
+
 var Load = new _Load()
 exports.Load = Load
-
 
 function _Save () {
 }
@@ -48,9 +48,9 @@ _Save.prototype.fileSelected = function (controller) {
 
     controller.changeState(Ready)
 }
+
 var Save = new _Save()
 exports.Save = Save
-
 
 function _SelectedTransition () {
 }
@@ -67,9 +67,9 @@ _SelectedTransition.prototype.mousePressed = function (controller) {
 
     controller.changeState(Ready)
 }
+
 var SelectedTransition = new _SelectedTransition()
 exports.SelectedTransition = SelectedTransition
-
 
 function _Edit () {
 }
@@ -80,8 +80,6 @@ _Edit.prototype.keyTyped = function (controller) {
 
     controller.changeState(Selected)
 }
-var Edit = new _Edit()
-exports.Edit = Edit
 
 // transition to Selected
 // transition to Ready
@@ -91,17 +89,15 @@ _Edit.prototype.mousePressed = function (controller) {
 
     controller.changeState(Ready)
 }
-var Edit = new _Edit()
-exports.Edit = Edit
 
 // transition to NewTransition
 _Edit.prototype.mouseDragged = function (controller) {
 
     controller.changeState(NewTransition)
 }
+
 var Edit = new _Edit()
 exports.Edit = Edit
-
 
 function _NewState () {
 }
@@ -112,9 +108,9 @@ _NewState.prototype.start = function (controller) {
 
     controller.changeState(Ready)
 }
+
 var NewState = new _NewState()
 exports.NewState = NewState
-
 
 function _NewTransition () {
 }
@@ -125,9 +121,9 @@ _NewTransition.prototype.mouseReleased = function (controller) {
 
     controller.changeState(Selected)
 }
+
 var NewTransition = new _NewTransition()
 exports.NewTransition = NewTransition
-
 
 function _Move () {
 }
@@ -138,9 +134,9 @@ _Move.prototype.mouseReleased = function (controller) {
 
     controller.changeState(Selected)
 }
+
 var Move = new _Move()
 exports.Move = Move
-
 
 function _ScaleAndPan () {
 }
@@ -151,9 +147,9 @@ _ScaleAndPan.prototype.mouseReleased = function (controller) {
 
     controller.changeState(Ready)
 }
+
 var ScaleAndPan = new _ScaleAndPan()
 exports.ScaleAndPan = ScaleAndPan
-
 
 function _Start () {
 }
@@ -164,9 +160,9 @@ _Start.prototype.start = function (controller) {
 
     controller.changeState(Ready)
 }
+
 var Start = new _Start()
 exports.Start = Start
-
 
 function _MenuWheel () {
 }
@@ -186,14 +182,16 @@ _MenuWheel.prototype.mouseReleased = function (controller) {
 
     controller.changeState(Load)
 }
+
 var MenuWheel = new _MenuWheel()
 exports.MenuWheel = MenuWheel
-
 
 function _BaseState () {
 }
 inherits(_BaseState, _State)
 
+var BaseState = new _BaseState()
+exports.BaseState = BaseState
 
 function _Ready () {
 }
@@ -213,9 +211,9 @@ _Ready.prototype.mousePressed = function (controller) {
 
     controller.changeState(MenuWheel)
 }
+
 var Ready = new _Ready()
 exports.Ready = Ready
-
 
 function _Selected () {
 }
@@ -235,8 +233,6 @@ _Selected.prototype.mousePressed = function (controller) {
 
     controller.changeState(Edit)
 }
-var Selected = new _Selected()
-exports.Selected = Selected
 
 // transition to Move
 // transition to NewTransition
@@ -246,9 +242,9 @@ _Selected.prototype.mouseDragged = function (controller) {
 
     controller.changeState(NewTransition)
 }
+
 var Selected = new _Selected()
 exports.Selected = Selected
-
 
 function _EditTransition () {
 }
@@ -259,8 +255,6 @@ _EditTransition.prototype.keyTyped = function (controller) {
 
     controller.changeState(SelectedTransition)
 }
-var EditTransition = new _EditTransition()
-exports.EditTransition = EditTransition
 
 // transition to Ready
 // transition to SelectedTransition
@@ -270,7 +264,7 @@ _EditTransition.prototype.mousePressed = function (controller) {
 
     controller.changeState(SelectedTransition)
 }
+
 var EditTransition = new _EditTransition()
 exports.EditTransition = EditTransition
-
 
