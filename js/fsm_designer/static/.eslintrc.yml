@@ -30,8 +30,8 @@ globals:
     textWidth: true
     ellipse: true
     line: true
-    pushMatrix: true
-    popMatrix: true
+    push: true
+    pop: true
     atan2: true
     sqrt: true
     rotate: true

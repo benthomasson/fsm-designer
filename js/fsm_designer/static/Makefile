@@ -10,7 +10,6 @@ main:
 test:
 	browserify test.js  --standalone test > test_bundle.js
 
-
 generate:
 	fsm-designer generate-js ../../../fsm_designer/fsm_designer/design_fsm.yml fsm.js
 
