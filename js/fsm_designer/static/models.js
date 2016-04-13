@@ -1,17 +1,42 @@
 var inherits = require('inherits')
-
 var fsm = require('./fsm.js')
-
+var settings = require('./settings.js')
 
 function FSMState () {
+    this.x = 0
+    this.y = 0
+    this.label = ''
+    this.size = 100
+    this.selected = false
+    this.edit = false
+    this.label_offset = 0
+}
+FSMState.prototype.draw = function (controller) {
+    stroke(settings.COLOR)
+    fill(settings.FILL)
+    ellipse(this.x, this.y, this.size, this.size)
+    if (this.selected) {
+        strokeWeight(2)
+        stroke(settings.SELECTED_COLOR)
+        fill(settings.FILL)
+        ellipse(this.x, this.y, this.size + 6, this.size + 6)
+    }
+    fill(settings.COLOR)
+    textSize(settings.TEXT_SIZE)
+    if (this.edit) {
+        text(this.label + '_', this.x - textWidth(this.label + '_') / 2, this.y)
+    } else {
+        text(this.label, this.x - textWidth(this.label) / 2, this.y)
+    }
+}
+FSMState.prototype.is_selected = function (controller) {
+    return Math.pow((controller.mousePX - this.x), 2) + Math.pow((controller.mousePY - this.y), 2) < Math.pow((this.size / 2), 2)
 }
 exports.FSMState = FSMState
 
 function FSMTransition () {
 }
 exports.FSMTransition = FSMTransition
-
-
 
 function Application () {
     this.states = []
@@ -37,7 +62,6 @@ function Application () {
     this.model = null
     this.app = null
     this.directory = null
-
 }
 
 inherits(Application, fsm.Controller)

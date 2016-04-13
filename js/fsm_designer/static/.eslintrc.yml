@@ -27,5 +27,7 @@ globals:
     LEFT: true
     textAlign: true
     textSize: true
+    textWidth: true
+    ellipse: true
 rules:
     indent: ["error", 4]
