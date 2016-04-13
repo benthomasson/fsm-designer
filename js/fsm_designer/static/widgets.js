@@ -54,16 +54,16 @@ Widget.prototype.mousePressed = function () {
 Widget.prototype.mouseReleased = function () {
 }
 
-Widget.prototype.topExtent = function () {
+Widget.prototype.top_extent = function () {
     return 0
 }
-Widget.prototype.bottomExtent = function () {
+Widget.prototype.bottom_extent = function () {
     return 0
 }
-Widget.prototype.leftExtent = function () {
+Widget.prototype.left_extent = function () {
     return 0
 }
-Widget.prototype.rightExtent = function () {
+Widget.prototype.right_extent = function () {
     return 0
 }
 
@@ -101,24 +101,24 @@ Button.prototype.mouseReleased = function () {
     this.state.mouseReleased(this)
 }
 
-Button.prototype.topExtent = function () {
+Button.prototype.top_extent = function () {
     return this.y
 }
-Button.prototype.leftExtent = function () {
+Button.prototype.left_extent = function () {
     return this.x
 }
-Button.prototype.rightExtent = function () {
+Button.prototype.right_extent = function () {
     textSize(this.text_size)
     return this.x + textWidth(this.label) + this.size
 }
-Button.prototype.bottomExtent = function () {
+Button.prototype.bottom_extent = function () {
     return this.y + this.size + this.text_size
 }
 Button.prototype.width = function () {
-    return this.rightExtent() - this.leftExtent()
+    return this.right_extent() - this.left_extent()
 }
 Button.prototype.height = function () {
-    return this.bottomExtent() - this.topExtent()
+    return this.bottom_extent() - this.top_extent()
 }
 
 Button.prototype.draw = function () {

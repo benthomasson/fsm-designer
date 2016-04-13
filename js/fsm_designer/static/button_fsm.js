@@ -17,10 +17,18 @@ Controller.prototype.changeState = function (state) {
     }
 }
 function _State () {
-    _State.prototype.start = function (controller) {
-    }
-    _State.prototype.end = function (controller) {
-    }
+}
+_State.prototype.start = function (controller) {
+}
+_State.prototype.end = function (controller) {
+}
+_State.prototype.mouseOut = function (controller) {
+}
+_State.prototype.mouseOver = function (controller) {
+}
+_State.prototype.mousePressed = function (controller) {
+}
+_State.prototype.mouseReleased = function (controller) {
 }
 var State = new _State()
 exports.State = State

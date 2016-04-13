@@ -17,4 +17,4 @@ generate-button-fsm:
 	fsm-designer generate-js ../../../fsm_designer/processing_widgets/button_fsm.yml button_fsm.js
 
 lint:
-	eslint fsm.js models.js widgets.js settings.js button_fsm.js
+	eslint fsm.js models.js widgets.js settings.js button_fsm.js widget_test.js
