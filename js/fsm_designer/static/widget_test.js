@@ -9,11 +9,19 @@ var state = new main.models.FSMState()
 var state2 = new main.models.FSMState()
 var transition = new main.models.FSMTransition()
 var button = new main.widgets.Button()
+var button1 = new main.widgets.Button()
+var button2 = new main.widgets.Button()
 button.call_back = function (button) {
     console.log('Button pressed!')
 }
 var active_widgets = []
 active_widgets.push(button)
+active_widgets.push(button1)
+active_widgets.push(button2)
+var bar = new main.widgets.ButtonBar()
+bar.buttons.push(button)
+bar.buttons.push(button1)
+bar.buttons.push(button2)
 
 function setup () {
     createCanvas(windowWidth, windowHeight)
@@ -41,10 +49,12 @@ function draw () {
     state2.draw(application)
 
     button.label = 'Press'
-    button.x = 100
-    button.y = 300
+    button1.label = '1'
+    button2.label = '2'
+    bar.x = 100
+    bar.y = 300
 
-    button.draw(application)
+    bar.draw(application)
 
     for (var i = 0; i < active_widgets.length; i++) {
         widget = active_widgets[i]

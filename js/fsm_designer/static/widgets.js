@@ -164,3 +164,38 @@ function button (x, y, label, text_size = 20, size = 20, color = '#5A5A5A', fill
     return Button(x, y, label, text_size, size, color, fill).draw()
 }
 exports.button = button
+
+function ButtonBar (buttons, x = 0, y = 0, size = 50, color = '#5A5A5A', fill = '#B9B9B9', padding = 5) {
+    this.x = x
+    this.y = y
+    this.color = color
+    this.fill = fill
+    this.size = size
+    this.padding = padding
+    this.buttons = []
+    this.buttons.concat(buttons)
+}
+
+ButtonBar.prototype.draw = function () {
+    strokeWeight(2)
+    fill(this.fill)
+    noStroke()
+    var width = 0
+    var i = 0
+    var b = null
+    for (i = 0; i < this.buttons.length; i++) {
+        b = this.buttons[i]
+        width += b.width()
+    }
+    rect(this.x, this.y, width + this.padding, this.size, this.size / 5)
+    var x = this.x + this.padding
+    var y = this.y + this.padding
+    for (i = 0; i < this.buttons.length; i++) {
+        b = this.buttons[i]
+        b.x = x
+        b.y = y
+        b.draw()
+        x += b.width() + this.padding
+    }
+}
+exports.ButtonBar = ButtonBar
