@@ -22,6 +22,7 @@ FSMState.prototype.draw = function (controller) {
         fill(settings.FILL)
         ellipse(this.x, this.y, this.size + 6, this.size + 6)
     }
+    noStroke()
     fill(settings.COLOR)
     textSize(settings.TEXT_SIZE)
     if (this.edit) {
@@ -122,10 +123,11 @@ Application.prototype.validate = function (button) {
 
 Application.prototype.draw = function (controller) {
     if (this.debug) {
+        noStroke()
         fill(255)
         scale(1 / this.scaleXY)
         translate(-this.panX, -this.panY)
-        text('fps: ' + frameRate(), windowWidth - 200, 10)
+        text('fps: ' + frameRate(), 10, 10)
     }
 }
 exports.Application = Application

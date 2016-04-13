@@ -36,5 +36,7 @@ globals:
     sqrt: true
     rotate: true
     triangle: true
+    CENTER: true
+    BASELINE: true
 rules:
     indent: ["error", 4]

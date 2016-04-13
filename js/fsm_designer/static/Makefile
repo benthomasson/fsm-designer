@@ -10,8 +10,11 @@ main:
 test:
 	browserify test.js  --standalone test > test_bundle.js
 
-generate:
+generate-fsm:
 	fsm-designer generate-js ../../../fsm_designer/fsm_designer/design_fsm.yml fsm.js
 
+generate-button-fsm:
+	fsm-designer generate-js ../../../fsm_designer/processing_widgets/button_fsm.yml button_fsm.js
+
 lint:
-	eslint fsm.js models.js widgets.js settings.js
+	eslint fsm.js models.js widgets.js settings.js button_fsm.js

@@ -2,7 +2,6 @@ var inherits = require('inherits')
 
 function Controller () {
     this.state = null
-
 }
 exports.Controller = Controller
 
@@ -32,7 +31,6 @@ inherits(_Load, _State)
 
 // transition to Ready
 _Load.prototype.fileSelected = function (controller) {
-
     controller.changeState(Ready)
 }
 
@@ -45,7 +43,6 @@ inherits(_Save, _State)
 
 // transition to Ready
 _Save.prototype.fileSelected = function (controller) {
-
     controller.changeState(Ready)
 }
 
@@ -60,11 +57,8 @@ inherits(_SelectedTransition, _State)
 // transition to MenuWheel
 // transition to Ready
 _SelectedTransition.prototype.mousePressed = function (controller) {
-
     controller.changeState(EditTransition)
-
     controller.changeState(MenuWheel)
-
     controller.changeState(Ready)
 }
 
@@ -77,22 +71,18 @@ inherits(_Edit, _State)
 
 // transition to Selected
 _Edit.prototype.keyTyped = function (controller) {
-
     controller.changeState(Selected)
 }
 
 // transition to Selected
 // transition to Ready
 _Edit.prototype.mousePressed = function (controller) {
-
     controller.changeState(Selected)
-
     controller.changeState(Ready)
 }
 
 // transition to NewTransition
 _Edit.prototype.mouseDragged = function (controller) {
-
     controller.changeState(NewTransition)
 }
 
@@ -105,7 +95,6 @@ inherits(_NewState, _State)
 
 // transition to Ready
 _NewState.prototype.start = function (controller) {
-
     controller.changeState(Ready)
 }
 
@@ -118,7 +107,6 @@ inherits(_NewTransition, _State)
 
 // transition to Selected
 _NewTransition.prototype.mouseReleased = function (controller) {
-
     controller.changeState(Selected)
 }
 
@@ -131,7 +119,6 @@ inherits(_Move, _State)
 
 // transition to Selected
 _Move.prototype.mouseReleased = function (controller) {
-
     controller.changeState(Selected)
 }
 
@@ -144,7 +131,6 @@ inherits(_ScaleAndPan, _State)
 
 // transition to Ready
 _ScaleAndPan.prototype.mouseReleased = function (controller) {
-
     controller.changeState(Ready)
 }
 
@@ -157,7 +143,6 @@ inherits(_Start, _State)
 
 // transition to Ready
 _Start.prototype.start = function (controller) {
-
     controller.changeState(Ready)
 }
 
@@ -173,13 +158,9 @@ inherits(_MenuWheel, _State)
 // transition to Ready
 // transition to Load
 _MenuWheel.prototype.mouseReleased = function (controller) {
-
     controller.changeState(NewState)
-
     controller.changeState(Save)
-
     controller.changeState(Ready)
-
     controller.changeState(Load)
 }
 
@@ -202,13 +183,9 @@ inherits(_Ready, _State)
 // transition to Selected
 // transition to MenuWheel
 _Ready.prototype.mousePressed = function (controller) {
-
     controller.changeState(ScaleAndPan)
-
     controller.changeState(SelectedTransition)
-
     controller.changeState(Selected)
-
     controller.changeState(MenuWheel)
 }
 
@@ -224,22 +201,16 @@ inherits(_Selected, _State)
 // transition to Move
 // transition to Edit
 _Selected.prototype.mousePressed = function (controller) {
-
     controller.changeState(MenuWheel)
-
     controller.changeState(Ready)
-
     controller.changeState(Move)
-
     controller.changeState(Edit)
 }
 
 // transition to Move
 // transition to NewTransition
 _Selected.prototype.mouseDragged = function (controller) {
-
     controller.changeState(Move)
-
     controller.changeState(NewTransition)
 }
 
@@ -252,16 +223,13 @@ inherits(_EditTransition, _State)
 
 // transition to SelectedTransition
 _EditTransition.prototype.keyTyped = function (controller) {
-
     controller.changeState(SelectedTransition)
 }
 
 // transition to Ready
 // transition to SelectedTransition
 _EditTransition.prototype.mousePressed = function (controller) {
-
     controller.changeState(Ready)
-
     controller.changeState(SelectedTransition)
 }
 
