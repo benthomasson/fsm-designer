@@ -1,6 +1,7 @@
 var inherits = require('inherits')
 var fsm = require('./fsm.js')
 var settings = require('./settings.js')
+var widgets = require('./widgets.js')
 
 function FSMState () {
     this.x = 0
@@ -35,6 +36,47 @@ FSMState.prototype.is_selected = function (controller) {
 exports.FSMState = FSMState
 
 function FSMTransition () {
+    this.from_state = null
+    this.to_state = null
+    this.label = ''
+    this.selected = false
+    this.edit = false
+}
+FSMTransition.prototype.draw = function (controller) {
+    this.label_offset = 0
+    for (var i = 0; i < controller.transitions.length; i++) {
+        var t = controller.transitions[i]
+        if (t === this) {
+            break
+        }
+        if (t.to_state === this.to_state && t.from_state === this.from_state) {
+            this.label_offset += 1
+        }
+    }
+    var label = this.label
+    if (this.edit) {
+        label = this.label + '_'
+    }
+    if (this.from_state != null && this.to_state == null) {
+        widgets.arrow(this.from_state.x,
+                      this.from_state.y,
+                      controller.mousePX,
+                      controller.mousePY,
+                      0,
+                      label,
+                      this.selected,
+                      this.label_offset)
+    }
+    if (this.from_state != null && this.to_state != null) {
+        widgets.arrow(this.from_state.x,
+                      this.from_state.y,
+                      this.to_state.x,
+                      this.to_state.y,
+                      this.to_state.size / 2,
+                      label,
+                      this.selected,
+                      this.label_offset)
+    }
 }
 exports.FSMTransition = FSMTransition
 

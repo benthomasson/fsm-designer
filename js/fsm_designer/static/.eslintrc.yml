@@ -29,5 +29,12 @@ globals:
     textSize: true
     textWidth: true
     ellipse: true
+    line: true
+    pushMatrix: true
+    popMatrix: true
+    atan2: true
+    sqrt: true
+    rotate: true
+    triangle: true
 rules:
     indent: ["error", 4]

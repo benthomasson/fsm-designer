@@ -15,4 +15,4 @@ generate:
 	fsm-designer generate-js ../../../fsm_designer/fsm_designer/design_fsm.yml fsm.js
 
 lint:
-	eslint fsm.js models.js
+	eslint fsm.js models.js widgets.js settings.js
