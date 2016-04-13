@@ -8,6 +8,7 @@ var application = new main.models.Application()
 var state = new main.models.FSMState()
 var state2 = new main.models.FSMState()
 var transition = new main.models.FSMTransition()
+var button = new main.widgets.Button()
 
 function setup () {
     createCanvas(windowWidth, windowHeight)
@@ -33,8 +34,15 @@ function draw() {
     transition.draw(application)
     state.draw(application)
     state2.draw(application)
-    application.draw(application)
 
+    button.label = "Press"
+    button.x = 100
+    button.y = 300
+
+    button.draw(application)
+
+
+    application.draw(application)
 }
 
 function windowResized () {

@@ -115,10 +115,10 @@ Button.prototype.bottomExtent = function () {
     return this.y + this.size + this.text_size
 }
 Button.prototype.width = function () {
-    return this.right_extent() - this.left_extent()
+    return this.rightExtent() - this.leftExtent()
 }
 Button.prototype.height = function () {
-    return this.bottom_extent() - this.top_extent()
+    return this.bottomExtent() - this.topExtent()
 }
 
 Button.prototype.draw = function () {
@@ -141,7 +141,7 @@ Button.prototype.draw_button = function () {
         fill(this.fill)
     }
     textSize(this.text_size)
-    rect(0, 0, this.width, this.height, this.size / 5)
+    rect(0, 0, this.width(), this.height(), this.size / 5)
     pop()
 }
 Button.prototype.draw_icon = function () {
