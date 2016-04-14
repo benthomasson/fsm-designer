@@ -64,14 +64,26 @@ def generate_code(code_template, missing_states, missing_transitions):
     template = env.get_template(code_template)
 
     states = []
+    missing_transitions_copy = missing_transitions.copy()
 
     for state in missing_states:
         state_missing_transitions = [dict(x) for x in missing_transitions if dict(x).get('from_state') == state]
+        for x in missing_transitions:
+            if dict(x).get('from_state') == state:
+                missing_transitions_copy.remove(x)
         functions = dict()
         for t in state_missing_transitions:
             transitions = functions.get(t['label'], [])
             transitions.append(t)
             functions[t['label']] = transitions
         states.append((state, functions.items()))
+
+    state_missing_transitions = [dict(x) for x in missing_transitions_copy]
+    for t in state_missing_transitions:
+        functions = dict()
+        transitions = functions.get(t['label'], [])
+        transitions.append(t)
+        functions[t['label']] = transitions
+        states.append((t.get('from_state'), functions.items()))
 
     return template.render(states=states)
