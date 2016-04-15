@@ -35,6 +35,11 @@ setup(
     license="BSD",
     zip_safe=False,
     keywords='fsm_designer',
+    entry_points={
+        'console_scripts': [
+            'fsm-designer = fsm_designer.cli:main',
+        ]
+    },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

@@ -13,6 +13,7 @@ var MoveMousePointer = new main.widgets.MoveMousePointer()
 var MagnifyingGlassMousePointer = new main.widgets.MagnifyingGlassMousePointer()
 var ArrowMousePointer = new main.widgets.ArrowMousePointer()
 var pointer_count_down = null
+var socket = io.connect('/fsm-designer');
 button.call_back = function (button) {
     console.log('Button pressed!')
 }
