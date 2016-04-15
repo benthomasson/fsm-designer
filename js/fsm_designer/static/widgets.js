@@ -273,7 +273,6 @@ ArrowMousePointer.prototype.draw = function () {
     push()
     translate(x, y)
     rotate(PI / 3)
-    //translate(this.size / 2, 0)
     line(this.size, 0, 0, 0)
     triangle(0, 0, 6, -3, 6, 3)
     pop()
