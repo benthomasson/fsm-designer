@@ -1,9 +1,6 @@
 
 console.log(main)
 
-var scaleXY = 1.0
-var panX = 0
-var panY = 0
 var application = new main.models.Application()
 var state = new main.models.FSMState()
 var state2 = new main.models.FSMState()
@@ -28,8 +25,11 @@ function setup () {
 }
 
 function draw () {
-    translate(panX, panY)
-    scale(scaleXY)
+    push()
+    translate(application.panX, application.panY)
+    scale(application.scaleXY)
+    application.mouseSX = mouseX * 1 / application.scaleXY
+    application.mouseSY = mouseY * 1 / application.scaleXY
     background(102)
     fill(255)
 
@@ -54,6 +54,9 @@ function draw () {
     bar.x = 100
     bar.y = 300
 
+    application.draw(application)
+    pop()
+
     bar.draw(application)
 
     for (var i = 0; i < active_widgets.length; i++) {
@@ -69,7 +72,6 @@ function draw () {
         }
     }
 
-    application.draw(application)
 }
 
 function windowResized () {
@@ -77,12 +79,12 @@ function windowResized () {
 }
 
 function mouseWheel (event) {
-    scaleXY = scaleXY + event.delta / 100
-    if (scaleXY < 0.2) {
-        scaleXY = 0.2
+    application.scaleXY = application.scaleXY + event.delta / 100
+    if (application.scaleXY < 0.2) {
+        application.scaleXY = 0.2
     }
-    if (scaleXY > 10) {
-        scaleXY = 10
+    if (application.scaleXY > 10) {
+        application.scaleXY = 10
     }
     return false
 }

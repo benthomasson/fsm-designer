@@ -187,7 +187,7 @@ ButtonBar.prototype.draw = function () {
         b = this.buttons[i]
         width += b.width()
     }
-    rect(this.x, this.y, width + this.padding, this.size, this.size / 5)
+    rect(this.x, this.y, width + this.padding * (this.buttons.length + 1), this.size, this.size / 5)
     var x = this.x + this.padding
     var y = this.y + this.padding
     for (i = 0; i < this.buttons.length; i++) {

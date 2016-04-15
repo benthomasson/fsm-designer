@@ -88,10 +88,10 @@ function Application () {
     this.panY = 0
     this.oldPanX = 0
     this.oldPanY = 0
-    this.scaleXY = 1
+    this.scaleXY = 1.0
     this.oldScaleXY = 0
-    this.mousePX = 0
-    this.mousePY = 0
+    this.mouseSX = 0
+    this.mouseSY = 0
     this.mousePressedX = 0
     this.mousePressedY = 0
     this.lastKeyCode = 0
