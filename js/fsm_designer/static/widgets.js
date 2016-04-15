@@ -199,3 +199,83 @@ ButtonBar.prototype.draw = function () {
     }
 }
 exports.ButtonBar = ButtonBar
+
+function MoveMousePointer (size = 20, color = '#5A5A5A') {
+    this.size = size
+    this.color = color
+}
+
+MoveMousePointer.prototype.draw = function () {
+    var x = mouseX
+    var y = mouseY
+    strokeWeight(2)
+    stroke(this.color)
+    push()
+    translate(x, y)
+    for (var r = 0; r < 4; r++) {
+        rotate(PI / 2)
+        line(this.size / 2, 0, 0, 0)
+        push()
+        translate(this.size / 2, 0)
+        fill(this.color)
+        triangle(0, 0, -4, 2, -4, -2)
+        pop()
+    }
+    pop()
+}
+exports.MoveMousePointer = MoveMousePointer
+
+function MagnifyingGlassMousePointer (size = 20, color = '#5A5A5A') {
+    this.size = size
+    this.color = color
+}
+
+MagnifyingGlassMousePointer.prototype.draw = function () {
+    var x = mouseX
+    var y = mouseY
+    strokeWeight(2)
+    noFill()
+    stroke(this.color)
+    ellipse(x, y, this.size, this.size)
+    push()
+    translate(x, y)
+    rotate(PI / 4)
+    translate(this.size / 2, 0)
+    line(this.size / 2, 0, 0, 0)
+    pop()
+    push()
+    translate(x, y)
+    rotate(PI / 2)
+    for (var r = 0; r < 2; r++) {
+        rotate(PI)
+        push()
+        translate(this.size, 0)
+        line(this.size / 2, 0, 0, 0)
+        translate(this.size / 2, 0)
+        triangle(0, 0, -4, 2, -4, -2)
+        pop()
+    }
+    pop()
+}
+exports.MagnifyingGlassMousePointer = MagnifyingGlassMousePointer
+
+function ArrowMousePointer (size = 20, color = '#5A5A5A') {
+    this.size = size
+    this.color = color
+}
+
+ArrowMousePointer.prototype.draw = function () {
+    var x = mouseX
+    var y = mouseY
+    strokeWeight(2)
+    noFill()
+    stroke(this.color)
+    push()
+    translate(x, y)
+    rotate(PI / 3)
+    //translate(this.size / 2, 0)
+    line(this.size, 0, 0, 0)
+    triangle(0, 0, 6, -3, 6, 3)
+    pop()
+}
+exports.ArrowMousePointer = ArrowMousePointer

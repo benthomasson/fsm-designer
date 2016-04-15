@@ -38,5 +38,7 @@ globals:
     triangle: true
     CENTER: true
     BASELINE: true
+    PI: true
+    noFill: true
 rules:
     indent: ["error", 4]

@@ -124,7 +124,7 @@ Application.prototype.validate = function (button) {
 Application.prototype.draw = function (controller) {
     if (this.debug) {
         noStroke()
-        fill(255)
+        fill(0)
         scale(1 / this.scaleXY)
         translate(-this.panX, -this.panY)
         text('fps: ' + frameRate(), 10, 10)

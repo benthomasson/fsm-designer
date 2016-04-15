@@ -8,6 +8,11 @@ var transition = new main.models.FSMTransition()
 var button = new main.widgets.Button()
 var button1 = new main.widgets.Button()
 var button2 = new main.widgets.Button()
+var mousePointer = null
+var MoveMousePointer = new main.widgets.MoveMousePointer()
+var MagnifyingGlassMousePointer = new main.widgets.MagnifyingGlassMousePointer()
+var ArrowMousePointer = new main.widgets.ArrowMousePointer()
+var pointer_count_down = null
 button.call_back = function (button) {
     console.log('Button pressed!')
 }
@@ -22,6 +27,8 @@ bar.buttons.push(button2)
 
 function setup () {
     createCanvas(windowWidth, windowHeight)
+    noCursor()
+    mousePointer = ArrowMousePointer
 }
 
 function draw () {
@@ -30,7 +37,7 @@ function draw () {
     scale(application.scaleXY)
     application.mouseSX = mouseX * 1 / application.scaleXY
     application.mouseSY = mouseY * 1 / application.scaleXY
-    background(102)
+    background(255)
     fill(255)
 
     state.x = 100
@@ -59,6 +66,18 @@ function draw () {
 
     bar.draw(application)
 
+    if (pointer_count_down === null) {
+        // do nothing
+    } else if (pointer_count_down <= 2) {
+        mousePointer = ArrowMousePointer
+    } else {
+        pointer_count_down -= 1
+    }
+
+    if (mousePointer) {
+        mousePointer.draw()
+    }
+
     for (var i = 0; i < active_widgets.length; i++) {
         widget = active_widgets[i]
         if (mouseX > widget.left_extent() &&
@@ -79,6 +98,8 @@ function windowResized () {
 }
 
 function mouseWheel (event) {
+    mousePointer = MagnifyingGlassMousePointer
+    pointer_count_down = frameRate() / 2
     application.scaleXY = application.scaleXY + event.delta / 100
     if (application.scaleXY < 0.2) {
         application.scaleXY = 0.2
@@ -112,6 +133,16 @@ function mouseReleased () {
             widget.mouseReleased()
         }
     }
+    mousePointer = ArrowMousePointer
+    pointer_count_down = null
+}
+
+function mouseDragged () {
+    mousePointer = MoveMousePointer
+    pointer_count_down = null
+    application.panX += mouseX - pmouseX
+    application.panY += mouseY - pmouseY
+    return false;
 }
 
 !(function () {
@@ -121,4 +152,5 @@ function mouseReleased () {
     this.mouseWheel = mouseWheel
     this.mousePressed = mousePressed
     this.mouseReleased = mouseReleased
+    this.mouseDragged = mouseDragged
 }())
