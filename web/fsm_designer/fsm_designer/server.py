@@ -3,21 +3,13 @@
 from gevent import monkey
 monkey.patch_all()
 
-import gevent
 
-import os
-import time
-import psutil
-import getpass
 import socket
 import pkg_resources
 import logging
 
 from bottle import route, request
 from bottle import static_file
-
-import whisper
-
 
 from socketio.namespace import BaseNamespace
 from socketio.mixins import BroadcastMixin
@@ -32,9 +24,11 @@ class AgentNamespace(BaseNamespace, BroadcastMixin):
 
 from socketio import socketio_manage
 
+
 @route('/status')
 def status():
     return "running"
+
 
 @route('/socket.io/<remaining:path>')
 def index(remaining):

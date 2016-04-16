@@ -31,6 +31,13 @@ setup(
     package_dir={'fsm_designer': 'fsm_designer'},
     include_package_data=True,
     install_requires=[
+        'gevent',
+        'bottle',
+        'docopt',
+        'python-daemon',
+        'psutil',
+        'lockfile',
+        'pidfile',
     ],
     license="BSD",
     zip_safe=False,

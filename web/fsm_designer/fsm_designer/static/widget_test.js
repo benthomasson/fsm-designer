@@ -112,6 +112,15 @@ function mouseWheel (event) {
 }
 
 function mousePressed () {
+    if (mouseButton == LEFT) {
+        console.log('left')
+    }
+    if (mouseButton == RIGHT) {
+        console.log('right')
+    }
+    if (mouseButton == CENTER) {
+        console.log('center')
+    }
     for (var i = 0; i < active_widgets.length; i++) {
         widget = active_widgets[i]
         if (mouseX > widget.left_extent() &&
@@ -119,9 +128,11 @@ function mousePressed () {
                 mouseY > widget.top_extent() &&
                 mouseY < widget.bottom_extent()) {
             widget.mousePressed()
-            return
+            return false
         }
     }
+
+    return false
 }
 
 function mouseReleased () {
