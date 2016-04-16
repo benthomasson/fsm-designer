@@ -105,6 +105,34 @@ function Application () {
     this.model = null
     this.app = null
     this.directory = null
+    this.MoveMousePointer = new widgets.MoveMousePointer()
+    this.MagnifyingGlassMousePointer = new widgets.MagnifyingGlassMousePointer()
+    this.ArrowMousePointer = new widgets.ArrowMousePointer()
+    this.pointer_count_down = null
+    this.mousePointer = this.ArrowMousePointer
+
+    var button0 = new widgets.Button()
+    var button1 = new widgets.Button()
+    var button2 = new widgets.Button()
+    var button3 = new widgets.Button()
+    this.bar = new widgets.ButtonBar()
+    this.bar.buttons.push(button0)
+    this.bar.buttons.push(button1)
+    this.bar.buttons.push(button2)
+    this.bar.buttons.push(button3)
+
+    this.active_widgets.push(button0)
+    this.active_widgets.push(button1)
+    this.active_widgets.push(button2)
+    this.active_widgets.push(button3)
+
+    button0.label = 'Load'
+    button1.label = 'Save'
+    button2.label = 'New State'
+    button3.label = 'New Transition'
+
+    this.bar.x = 10
+    this.bar.y = 10
 }
 
 inherits(Application, fsm.Controller)
@@ -121,13 +149,54 @@ Application.prototype.generate = function (button) {
 Application.prototype.validate = function (button) {
 }
 
-Application.prototype.draw = function (controller) {
+Application.prototype.draw_content = function (controller) {
+    var i = 0
+    for (i = 0; i < this.transitions.length; i++) {
+        this.transitions[i].draw(controller)
+    }
+    for (i = 0; i < this.states.length; i++) {
+        this.states[i].draw(controller)
+    }
+}
+
+Application.prototype.draw_menus = function (controller) {
+    this.bar.draw(controller)
     if (this.debug) {
+        var from_right = 5
         noStroke()
         fill(0)
-        scale(1 / this.scaleXY)
-        translate(-this.panX, -this.panY)
-        text('fps: ' + frameRate(), 10, 10)
+        var fps_string = 'fps: ' + frameRate().toFixed(0)
+        text(fps_string, width - (from_right * textSize()), textSize())
+        text("state:" + this.state, width - (from_right * textSize()), textSize() * 2)
+        text("pcd:" + this.pointer_count_down, width - (from_right * textSize()), textSize() * 3)
+    }
+
+    if (this.pointer_count_down === null) {
+        // do nothing
+    } else if (this.pointer_count_down <= 1) {
+        this.mousePointer = this.ArrowMousePointer
+        this.pointer_count_down = null
+    } else {
+        this.pointer_count_down -= 1
+    }
+
+    if (this.mousePointer) {
+        this.mousePointer.draw()
+    }
+
+    var widget = null
+
+    for (var i = 0; i < controller.active_widgets.length; i++) {
+        widget = controller.active_widgets[i]
+        if (mouseX > widget.left_extent() &&
+                mouseX < widget.right_extent() &&
+                mouseY > widget.top_extent() &&
+                mouseY < widget.bottom_extent()) {
+            widget.mouseOver()
+        } else {
+            widget.mouseOut()
+            widget.mouseReleased()
+        }
     }
 }
 exports.Application = Application

@@ -3,6 +3,7 @@ plugins:
   - standard
 globals:
     io: true
+    noCursor: true
     fill: true
     background: true
     text: true
@@ -14,6 +15,8 @@ globals:
     keyCode: true
     mouseX: true
     mouseY: true
+    pmouseX: true
+    pmouseY: true
     windowWidth: true
     windowHeight: true
     resizeCanvas: true
@@ -21,10 +24,12 @@ globals:
     scale: true
     translate: true
     mouseWheel: true
+    mouseButton: true
     color: true
     noStroke: true
     TOP: true
     LEFT: true
+    RIGHT: true
     textAlign: true
     textSize: true
     textWidth: true
