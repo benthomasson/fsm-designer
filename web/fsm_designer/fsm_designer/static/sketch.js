@@ -48,28 +48,11 @@ function windowResized () {
 }
 
 function mouseWheel (event) {
-    application.mousePointer = application.MagnifyingGlassMousePointer
-    application.pointer_count_down = Math.floor(frameRate() / 2)
-    application.scaleXY = application.scaleXY + event.delta / 100
-    if (application.scaleXY < 0.2) {
-        application.scaleXY = 0.2
-    }
-    if (application.scaleXY > 10) {
-        application.scaleXY = 10
-    }
+    application.mouseWheel(event)
     return false
 }
 
 function mousePressed () {
-    if (mouseButton === LEFT) {
-        console.log('left')
-    }
-    if (mouseButton === RIGHT) {
-        console.log('right')
-    }
-    if (mouseButton === CENTER) {
-        console.log('center')
-    }
     var widget = null
     for (var i = 0; i < application.active_widgets.length; i++) {
         widget = application.active_widgets[i]
@@ -101,10 +84,7 @@ function mouseReleased () {
 }
 
 function mouseDragged () {
-    application.mousePointer = application.MoveMousePointer
-    application.pointer_count_down = null
-    application.panX += mouseX - pmouseX
-    application.panY += mouseY - pmouseY
+    application.mouseDragged()
     return false
 }
 

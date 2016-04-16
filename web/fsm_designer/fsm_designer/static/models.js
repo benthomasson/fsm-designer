@@ -1,7 +1,7 @@
-var inherits = require('inherits')
 var fsm = require('./fsm.js')
 var settings = require('./settings.js')
 var widgets = require('./widgets.js')
+var view_fsm = require('./view_fsm.js')
 
 function FSMState () {
     this.x = 0
@@ -82,6 +82,10 @@ FSMTransition.prototype.draw = function (controller) {
 exports.FSMTransition = FSMTransition
 
 function Application () {
+    this.main_fsm = new fsm.Controller()
+    this.view_fsm = new view_fsm.Controller()
+    this.view_fsm.state = view_fsm.ViewReady
+    this.view_fsm.application = this
     this.states = []
     this.transitions = []
     this.panX = 0
@@ -135,8 +139,6 @@ function Application () {
     this.bar.y = 10
 }
 
-inherits(Application, fsm.Controller)
-
 Application.prototype.save = function (button) {
 }
 
@@ -167,8 +169,8 @@ Application.prototype.draw_menus = function (controller) {
         fill(0)
         var fps_string = 'fps: ' + frameRate().toFixed(0)
         text(fps_string, width - (from_right * textSize()), textSize())
-        text("state:" + this.state, width - (from_right * textSize()), textSize() * 2)
-        text("pcd:" + this.pointer_count_down, width - (from_right * textSize()), textSize() * 3)
+        text('state:' + this.state, width - (from_right * textSize()), textSize() * 2)
+        text('pcd:' + this.pointer_count_down, width - (from_right * textSize()), textSize() * 3)
     }
 
     if (this.pointer_count_down === null) {
@@ -198,5 +200,12 @@ Application.prototype.draw_menus = function (controller) {
             widget.mouseReleased()
         }
     }
+}
+
+Application.prototype.mouseWheel = function (event) {
+    this.view_fsm.state.mouseWheel(this.view_fsm, event)
+}
+Application.prototype.mouseDragged = function () {
+    this.view_fsm.state.mouseDragged(this.view_fsm)
 }
 exports.Application = Application

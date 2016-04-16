@@ -2,7 +2,6 @@ var inherits = require('inherits')
 
 function Controller () {
     this.state = null
-
 }
 exports.Controller = Controller
 
@@ -31,5 +30,23 @@ function _ViewReady () {
 inherits(_ViewReady, _State)
 
 var ViewReady = new _ViewReady()
+
+_ViewReady.prototype.mouseDragged = function (controller) {
+    controller.application.mousePointer = controller.application.MoveMousePointer
+    controller.application.pointer_count_down = null
+    controller.application.panX += mouseX - pmouseX
+    controller.application.panY += mouseY - pmouseY
+}
+_ViewReady.prototype.mouseWheel = function (controller, event) {
+    controller.application.mousePointer = controller.application.MagnifyingGlassMousePointer
+    controller.application.pointer_count_down = Math.floor(frameRate() / 2)
+    controller.application.scaleXY = controller.application.scaleXY + event.delta / 100
+    if (controller.application.scaleXY < 0.2) {
+        controller.application.scaleXY = 0.2
+    }
+    if (controller.application.scaleXY > 10) {
+        controller.application.scaleXY = 10
+    }
+}
 exports.ViewReady = ViewReady
 

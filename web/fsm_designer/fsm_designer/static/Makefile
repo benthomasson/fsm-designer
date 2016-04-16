@@ -23,4 +23,5 @@ generate-menu-fsm:
 	fsm-designer generate-js menu_fsm.yml menu_fsm.fs
 
 lint:
-	eslint fsm.js models.js widgets.js settings.js button_fsm.js sketch.js
+	eslint fsm.js models.js widgets.js settings.js button_fsm.js sketch.js view_fsm.js menu_fsm.js
+

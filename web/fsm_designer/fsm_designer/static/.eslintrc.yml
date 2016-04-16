@@ -45,5 +45,7 @@ globals:
     BASELINE: true
     PI: true
     noFill: true
+    width: true
+    height: true
 rules:
     indent: ["error", 4]
