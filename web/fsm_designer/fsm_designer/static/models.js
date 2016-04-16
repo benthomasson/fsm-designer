@@ -2,6 +2,7 @@ var fsm = require('./fsm.js')
 var settings = require('./settings.js')
 var widgets = require('./widgets.js')
 var view_fsm = require('./view_fsm.js')
+var menu_fsm = require('./menu_fsm.js')
 
 function FSMState () {
     this.x = 0
@@ -82,10 +83,14 @@ FSMTransition.prototype.draw = function (controller) {
 exports.FSMTransition = FSMTransition
 
 function Application () {
-    this.main_fsm = new fsm.Controller()
-    this.view_fsm = new view_fsm.Controller()
-    this.view_fsm.state = view_fsm.ViewReady
-    this.view_fsm.application = this
+    var main_controller = this.main_controller = new fsm.Controller()
+    this.main_controller.application = this
+    var view_controller = this.view_controller = new view_fsm.Controller()
+    this.view_controller.state = view_fsm.ViewReady
+    this.view_controller.application = this
+    var menu_controller = this.menu_controller = new menu_fsm.Controller()
+    this.menu_controller.state = menu_fsm.MenuReady
+    this.menu_controller.application = this
     this.states = []
     this.transitions = []
     this.panX = 0
@@ -115,25 +120,38 @@ function Application () {
     this.pointer_count_down = null
     this.mousePointer = this.ArrowMousePointer
 
-    var button0 = new widgets.Button()
-    var button1 = new widgets.Button()
-    var button2 = new widgets.Button()
-    var button3 = new widgets.Button()
+    var load_button = new widgets.Button()
+    var save_button = new widgets.Button()
+    var new_state_button = new widgets.Button()
+    var new_transition_button = new widgets.Button()
     this.bar = new widgets.ButtonBar()
-    this.bar.buttons.push(button0)
-    this.bar.buttons.push(button1)
-    this.bar.buttons.push(button2)
-    this.bar.buttons.push(button3)
+    this.bar.buttons.push(load_button)
+    this.bar.buttons.push(save_button)
+    this.bar.buttons.push(new_state_button)
+    this.bar.buttons.push(new_transition_button)
 
-    this.active_widgets.push(button0)
-    this.active_widgets.push(button1)
-    this.active_widgets.push(button2)
-    this.active_widgets.push(button3)
+    this.active_widgets.push(load_button)
+    this.active_widgets.push(save_button)
+    this.active_widgets.push(new_state_button)
+    this.active_widgets.push(new_transition_button)
 
-    button0.label = 'Load'
-    button1.label = 'Save'
-    button2.label = 'New State'
-    button3.label = 'New Transition'
+    load_button.label = 'Load'
+    save_button.label = 'Save'
+    new_state_button.label = 'New State'
+    new_transition_button.label = 'New Transition'
+
+    load_button.call_back = function () {
+        menu_controller.state.load_button(menu_controller)
+    }
+    save_button.call_back = function () {
+        menu_controller.state.save_button(menu_controller)
+    }
+    new_state_button.call_back = function () {
+        menu_controller.state.new_state_button(menu_controller)
+    }
+    new_transition_button.call_back = function () {
+        menu_controller.state.new_transition_button(menu_controller)
+    }
 
     this.bar.x = 10
     this.bar.y = 10
@@ -203,9 +221,15 @@ Application.prototype.draw_menus = function (controller) {
 }
 
 Application.prototype.mouseWheel = function (event) {
-    this.view_fsm.state.mouseWheel(this.view_fsm, event)
+    this.view_controller.state.mouseWheel(this.view_controller, event)
 }
 Application.prototype.mouseDragged = function () {
-    this.view_fsm.state.mouseDragged(this.view_fsm)
+    this.view_controller.state.mouseDragged(this.view_controller)
+}
+Application.prototype.mousePressed = function () {
+    this.menu_controller.state.mousePressed(this.menu_controller)
+}
+Application.prototype.mouseReleased = function () {
+    this.menu_controller.state.mouseReleased(this.menu_controller)
 }
 exports.Application = Application
