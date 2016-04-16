@@ -1,0 +1,11 @@
+app: view_fsm
+states:
+- label: ViewReady
+  size: 100
+  x: 491
+  y: 309
+transitions: []
+view:
+  panX: 0
+  panY: 0
+  scaleXY: 1

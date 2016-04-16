@@ -1,0 +1,51 @@
+app: menu_fsm
+states:
+- label: MenuReady
+  size: 100
+  x: 510
+  y: 286
+- label: Save
+  size: 100
+  x: 737
+  y: 444
+- label: Load
+  size: 100
+  x: 363
+  y: 457
+- label: NewTransition
+  size: 100
+  x: 306
+  y: 139
+- label: NewState
+  size: 100
+  x: 684
+  y: 141
+transitions:
+- from_state: MenuReady
+  label: ''
+  to_state: Save
+- from_state: Save
+  label: ''
+  to_state: MenuReady
+- from_state: MenuReady
+  label: ''
+  to_state: Load
+- from_state: Load
+  label: ''
+  to_state: MenuReady
+- from_state: MenuReady
+  label: ''
+  to_state: NewTransition
+- from_state: NewTransition
+  label: ''
+  to_state: MenuReady
+- from_state: MenuReady
+  label: ''
+  to_state: NewState
+- from_state: NewState
+  label: ''
+  to_state: MenuReady
+view:
+  panX: 0
+  panY: 0
+  scaleXY: 1

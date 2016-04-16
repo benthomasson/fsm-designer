@@ -16,5 +16,11 @@ generate-fsm:
 generate-button-fsm:
 	fsm-designer generate-js ../../../fsm_designer/processing_widgets/button_fsm.yml button_fsm.js
 
+generate-view-fsm:
+	fsm-designer generate-js view_fsm.yml view_fsm.js
+
+generate-menu-fsm:
+	fsm-designer generate-js menu_fsm.yml menu_fsm.fs
+
 lint:
 	eslint fsm.js models.js widgets.js settings.js button_fsm.js sketch.js
