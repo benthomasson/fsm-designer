@@ -71,9 +71,12 @@ inherits(_SelectedTransition, _State)
 // transition to MenuWheel
 // transition to Ready
 _SelectedTransition.prototype.mousePressed = function (controller) {
-    controller.changeState(EditTransition)
-    controller.changeState(MenuWheel)
-    controller.changeState(Ready)
+    if (controller.application.selected_transition.is_selected(controller.application)) {
+        controller.changeState(EditTransition)
+    } else {
+        controller.changeState(Ready)
+        controller.state.mousePressed(controller)
+    }
 }
 
 var SelectedTransition = new _SelectedTransition()
@@ -247,10 +250,9 @@ _Ready.prototype.mousePressed = function (controller) {
     controller.application.select_item()
     if (controller.application.selected_state != null) {
         controller.changeState(Selected)
+    } else if (controller.application.selected_transition != null) {
+        controller.changeState(SelectedTransition)
     }
-
-    // controller.changeState(SelectedTransition)
-    // controller.changeState(Selected)
 }
 
 _Ready.prototype.mouseWheel = function (controller, event) {
@@ -298,15 +300,48 @@ function _EditTransition () {
 }
 inherits(_EditTransition, _State)
 
+_EditTransition.prototype.start = function (controller) {
+    controller.application.selected_transition.edit = true
+}
+
+_EditTransition.prototype.end = function (controller) {
+    controller.application.selected_transition.edit = false
+}
+
 // transition to SelectedTransition
 _EditTransition.prototype.keyTyped = function (controller) {
+    if (this.handle_special_keys(controller)) {
+        // do nothing
+    } else {
+        controller.application.selected_transition.label += key
+    }
 }
+
+_EditTransition.prototype.handle_special_keys = function (controller) {
+    if (keyCode === RETURN) {
+        controller.changeState(SelectedTransition)
+        return true
+    } else if (keyCode === ENTER) {
+        controller.changeState(SelectedTransition)
+        return true
+    } else if (keyCode === BACKSPACE) {
+        controller.application.selected_transition.label = controller.application.selected_transition.label.substring(0, controller.application.selected_transition.label.length - 1)
+        return true
+    } else if (keyCode === DELETE) {
+        controller.application.selected_transition.label = controller.application.selected_transition.label.substring(0, controller.application.selected_transition.label.length - 1)
+        return true
+    } else {
+        return false
+    }
+}
+
+_EditTransition.prototype.keyPressed = _EditTransition.prototype.handle_special_keys
 
 // transition to Ready
 // transition to SelectedTransition
 _EditTransition.prototype.mousePressed = function (controller) {
     controller.changeState(Ready)
-    controller.changeState(SelectedTransition)
+    // controller.changeState(SelectedTransition)
 }
 
 var EditTransition = new _EditTransition()

@@ -44,6 +44,86 @@ function FSMTransition () {
     this.selected = false
     this.edit = false
 }
+FSMTransition.prototype.is_selected = function (controller) {
+    var x1 = this.from_state.x
+    var y1 = this.from_state.y
+    var x2 = this.to_state.x
+    var y2 = this.to_state.y
+    var x = controller.mousePX
+    var y = controller.mousePY
+
+    var dx = x2 - x1
+    var dy = y2 - y1
+
+    var d = sqrt(dx * dx + dy * dy)
+
+    if (d === 0) {
+        return false
+    }
+
+    var ca = dx / d
+    var sa = dy / d
+
+    var mX = (-x1 + x) * ca + (-y1 + y) * sa
+
+    var result_x = null
+    var result_y = null
+
+    if (mX <= 0) {
+        result_x = x1
+        result_y = y1
+    } else if (mX >= d) {
+        result_x = x2
+        result_y = y2
+    } else {
+        result_x = x1 + mX * ca
+        result_y = y1 + mX * sa
+    }
+
+    dx = x - result_x
+    dy = y - result_y
+    var distance = sqrt(dx * dx + dy * dy)
+    var line_atan = atan2(y2 - y1, x2 - x1)
+    var pline_atan = atan2(result_y - y, result_x - x)
+    if (controller.debug) {
+        console.log('line_atan: ' + line_atan + 'pline_atan: ' + pline_atan)
+        if (abs(line_atan) < PI / 2.0 && pline_atan < 0) {
+            stroke(settings.COLOR)
+        } else if (abs(line_atan) > PI / 2.0 && pline_atan < 0) {
+            stroke(0)
+        } else if (abs(line_atan) > PI / 2.0 && pline_atan > 0) {
+            stroke(settings.COLOR)
+        } else {
+            stroke(0)
+        }
+        push()
+        controller.scaleAndPan()
+        line(x, y, result_x, result_y)
+        pop()
+    }
+    var selected_distance = 0
+    if (abs(line_atan) < PI / 2.0 && pline_atan < 0) {
+        selected_distance = 10
+    } else if (abs(line_atan) > PI / 2.0 && pline_atan < 0) {
+        selected_distance = 10 + settings.TEXT_SIZE * (this.label_offset + 1.5)
+    } else if (abs(line_atan) > PI / 2.0 && pline_atan > 0) {
+        selected_distance = 10
+    } else {
+        selected_distance = 10 + settings.TEXT_SIZE * (this.label_offset + 1.5)
+    }
+    if (distance < selected_distance) {
+        if (controller.debug) {
+            stroke(settings.SELECTED_COLOR)
+            push()
+            controller.scaleAndPan()
+            line(x, y, result_x, result_y)
+            pop()
+        }
+        return true
+    } else {
+        return false
+    }
+}
 FSMTransition.prototype.draw = function (controller) {
     this.label_offset = 0
     for (var i = 0; i < controller.transitions.length; i++) {
@@ -159,10 +239,17 @@ function Application () {
     this.bar.y = 10
 }
 
+Application.prototype.scaleAndPan = function () {
+    translate(this.panX, this.panY)
+    scale(this.scaleXY)
+}
+
 Application.prototype.select_item = function () {
     this.selected_state = null
+    this.selected_transition = null
     var i = 0
     var state = null
+    var transition = null
     for (i = 0; i < this.states.length; i++) {
         state = this.states[i]
         if (state.is_selected(this) && this.selected_state === null) {
@@ -170,6 +257,15 @@ Application.prototype.select_item = function () {
             this.selected_state = state
         } else {
             state.selected = false
+        }
+    }
+    for (i = 0; i < this.transitions.length; i++) {
+        transition = this.transitions[i]
+        if (transition.is_selected(this) && this.selected_state === null) {
+            transition.selected = true
+            this.selected_transition = transition
+        } else {
+            transition.selected = false
         }
     }
 }

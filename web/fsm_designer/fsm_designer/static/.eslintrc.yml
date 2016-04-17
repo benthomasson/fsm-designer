@@ -51,5 +51,6 @@ globals:
     ENTER: true
     DELETE: true
     RETURN: true
+    abs: true
 rules:
     indent: ["error", 4]
