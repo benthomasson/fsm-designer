@@ -123,6 +123,7 @@ _MenuReady.prototype.mouseReleased = function (controller) {
     }
     controller.application.mousePointer = controller.application.ArrowMousePointer
     controller.application.pointer_count_down = null
+    controller.next_controller.state.mouseReleased(controller.next_controller)
 }
 
 _MenuReady.prototype.mouseWheel = function (controller, event) {

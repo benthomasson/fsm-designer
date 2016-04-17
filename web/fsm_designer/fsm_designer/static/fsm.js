@@ -27,6 +27,8 @@ _State.prototype.mouseWheel = function (controller) {
 }
 _State.prototype.mouseDragged = function (controller) {
 }
+_State.prototype.mouseReleased = function (controller) {
+}
 var State = new _State()
 exports.State = State
 exports._State = _State
@@ -126,6 +128,19 @@ inherits(_Move, _State)
 // transition to Selected
 _Move.prototype.mouseReleased = function (controller) {
     controller.changeState(Selected)
+}
+
+_Move.prototype.start = function (controller) {
+    controller.application.mousePointer = controller.application.MoveMousePointer
+}
+
+_Move.prototype.end = function (controller) {
+    controller.application.mousePointer = controller.application.ArrowMousePointer
+}
+
+_Move.prototype.mouseDragged = function (controller) {
+    controller.application.selected_state.x = controller.application.mousePX
+    controller.application.selected_state.y = controller.application.mousePY
 }
 
 var Move = new _Move()
@@ -231,8 +246,8 @@ _Selected.prototype.mousePressed = function (controller) {
 // transition to Move
 // transition to NewTransition
 _Selected.prototype.mouseDragged = function (controller) {
-    // controller.changeState(Move)
-    // controller.changeState(NewTransition)
+    controller.changeState(Move)
+    controller.state.mouseDragged(controller)
 }
 
 var Selected = new _Selected()
