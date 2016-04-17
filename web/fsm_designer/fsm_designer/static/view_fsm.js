@@ -25,6 +25,16 @@ var State = new _State()
 exports.State = State
 exports._State = _State
 
+function _Start () {
+}
+inherits(_Start, _State)
+var Start = new _Start()
+
+_Start.prototype.start = function (controller) {
+    controller.changeState(ViewReady)
+}
+exports.Start = Start
+
 function _ViewReady () {
 }
 inherits(_ViewReady, _State)

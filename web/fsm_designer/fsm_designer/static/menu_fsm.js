@@ -25,6 +25,16 @@ var State = new _State()
 exports.State = State
 exports._State = _State
 
+function _Start () {
+}
+inherits(_Start, _State)
+var Start = new _Start()
+
+_Start.prototype.start = function (controller) {
+    controller.changeState(MenuReady)
+}
+exports.Start = Start
+
 function _Load () {
 }
 inherits(_Load, _State)
