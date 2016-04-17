@@ -33,7 +33,7 @@ function setup () {
 function draw () {
     push()
     application.mousePX = (mouseX - application.panX) / application.scaleXY
-    application.mousePY = (mouseY -application.panY) / application.scaleXY
+    application.mousePY = (mouseY - application.panY) / application.scaleXY
     translate(application.panX, application.panY)
     scale(application.scaleXY)
     application.mouseSX = mouseX * 1 / application.scaleXY
@@ -68,6 +68,23 @@ function mouseDragged () {
     return false
 }
 
+function keyTyped () {
+    application.keyTyped()
+    return false
+}
+
+function keyPressed () {
+    application.keyPressed()
+    // Prevent Chrome from using backspace for go to the last page.
+    if (keyCode === BACKSPACE) {
+        return false
+    }
+}
+
+function keyReleased () {
+    application.keyReleased()
+}
+
 !(function () {
     this.draw = draw
     this.setup = setup
@@ -77,4 +94,7 @@ function mouseDragged () {
     this.mouseReleased = mouseReleased
     this.mouseDragged = mouseDragged
     this.socket = socket
+    this.keyTyped = keyTyped
+    this.keyPressed = keyPressed
+    this.keyReleased = keyReleased
 }())

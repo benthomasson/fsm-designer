@@ -29,6 +29,12 @@ _State.prototype.mouseDragged = function (controller) {
 }
 _State.prototype.mouseReleased = function (controller) {
 }
+_State.prototype.keyTyped = function (controller) {
+}
+_State.prototype.keyPressed = function (controller) {
+}
+_State.prototype.keyReleased = function (controller) {
+}
 var State = new _State()
 exports.State = State
 exports._State = _State
@@ -77,21 +83,57 @@ function _Edit () {
 }
 inherits(_Edit, _State)
 
+_Edit.prototype.start = function (controller) {
+    controller.application.selected_state.edit = true
+}
+
+_Edit.prototype.end = function (controller) {
+    controller.application.selected_state.edit = false
+}
+
 // transition to Selected
 _Edit.prototype.keyTyped = function (controller) {
-    controller.changeState(Selected)
+    if (this.handle_special_keys(controller)) {
+        // do nothing
+    } else {
+        controller.application.selected_state.label += key
+    }
 }
+
+_Edit.prototype.handle_special_keys = function (controller) {
+    if (keyCode === RETURN) {
+        controller.changeState(Selected)
+        return true
+    } else if (keyCode === ENTER) {
+        controller.changeState(Selected)
+        return true
+    } else if (keyCode === BACKSPACE) {
+        controller.application.selected_state.label = controller.application.selected_state.label.substring(0, controller.application.selected_state.label.length - 1)
+        return true
+    } else if (keyCode === DELETE) {
+        controller.application.selected_state.label = controller.application.selected_state.label.substring(0, controller.application.selected_state.label.length - 1)
+        return true
+    } else {
+        return false
+    }
+}
+
+_Edit.prototype.keyPressed = _Edit.prototype.handle_special_keys
 
 // transition to Selected
 // transition to Ready
 _Edit.prototype.mousePressed = function (controller) {
-    controller.changeState(Selected)
-    controller.changeState(Ready)
+    if (controller.application.selected_state.is_selected(controller.application)) {
+        controller.changeState(Selected)
+    } else {
+        controller.changeState(Ready)
+        controller.state.mousePressed(controller)
+    }
 }
 
 // transition to NewTransition
 _Edit.prototype.mouseDragged = function (controller) {
-    controller.changeState(NewTransition)
+    controller.changeState(Move)
 }
 
 var Edit = new _Edit()
@@ -234,9 +276,8 @@ _Selected.prototype.mousePressed = function (controller) {
     // controller.changeState(MenuWheel)
     // controller.changeState(Ready)
     // controller.changeState(Move)
-    // controller.changeState(Edit)
     if (controller.application.selected_state.is_selected(controller.application)) {
-        // do nothing
+        controller.changeState(Edit)
     } else {
         controller.changeState(Ready)
         controller.state.mousePressed(controller)
@@ -259,7 +300,6 @@ inherits(_EditTransition, _State)
 
 // transition to SelectedTransition
 _EditTransition.prototype.keyTyped = function (controller) {
-    controller.changeState(SelectedTransition)
 }
 
 // transition to Ready

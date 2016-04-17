@@ -134,6 +134,16 @@ _MenuReady.prototype.mouseDragged = function (controller) {
     controller.next_controller.state.mouseDragged(controller.next_controller)
 }
 
+_MenuReady.prototype.keyTyped = function (controller) {
+    controller.next_controller.state.keyTyped(controller.next_controller)
+}
+_MenuReady.prototype.keyPressed = function (controller) {
+    controller.next_controller.state.keyPressed(controller.next_controller)
+}
+_MenuReady.prototype.keyReleased = function (controller) {
+    controller.next_controller.state.keyReleased(controller.next_controller)
+}
+
 var MenuReady = new _MenuReady()
 exports.MenuReady = MenuReady
 

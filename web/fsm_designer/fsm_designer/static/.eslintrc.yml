@@ -47,5 +47,9 @@ globals:
     noFill: true
     width: true
     height: true
+    BACKSPACE: true
+    ENTER: true
+    DELETE: true
+    RETURN: true
 rules:
     indent: ["error", 4]

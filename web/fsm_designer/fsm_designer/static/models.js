@@ -210,6 +210,8 @@ Application.prototype.draw_menus = function (controller) {
         text('pcd:' + this.pointer_count_down, width - (from_right * textSize()), textSize() * 5)
         text('X, Y:' + mouseX + ', ' + mouseY, width - (from_right * textSize()), textSize() * 6)
         text('PX, PY:' + this.mousePX + ', ' + this.mousePY, width - (from_right * textSize()), textSize() * 7)
+        text('key:' + key, width - (from_right * textSize()), textSize() * 8)
+        text('keyCode:' + keyCode, width - (from_right * textSize()), textSize() * 9)
     }
 
     if (this.pointer_count_down === null) {
@@ -252,5 +254,14 @@ Application.prototype.mousePressed = function () {
 }
 Application.prototype.mouseReleased = function () {
     this.menu_controller.state.mouseReleased(this.menu_controller)
+}
+Application.prototype.keyTyped = function () {
+    this.menu_controller.state.keyTyped(this.menu_controller)
+}
+Application.prototype.keyPressed = function () {
+    this.menu_controller.state.keyPressed(this.menu_controller)
+}
+Application.prototype.keyReleased = function () {
+    this.menu_controller.state.keyReleased(this.menu_controller)
 }
 exports.Application = Application
