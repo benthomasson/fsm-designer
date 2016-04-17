@@ -126,6 +126,14 @@ _MenuReady.prototype.mouseReleased = function (controller) {
     controller.application.pointer_count_down = null
 }
 
+_MenuReady.prototype.mouseWheel = function (controller, event) {
+    controller.next_controller.state.mouseWheel(controller.next_controller, event)
+}
+
+_MenuReady.prototype.mouseDragged = function (controller) {
+    controller.next_controller.state.mouseDragged(controller.next_controller)
+}
+
 var MenuReady = new _MenuReady()
 exports.MenuReady = MenuReady
 

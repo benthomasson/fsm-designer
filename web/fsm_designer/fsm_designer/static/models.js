@@ -85,12 +85,15 @@ exports.FSMTransition = FSMTransition
 function Application () {
     var main_controller = this.main_controller = new fsm.Controller()
     this.main_controller.application = this
+    this.main_controller.changeState(fsm.Start)
     var view_controller = this.view_controller = new view_fsm.Controller()
-    this.view_controller.changeState(view_fsm.Start)
     this.view_controller.application = this
+    this.view_controller.changeState(view_fsm.Start)
     var menu_controller = this.menu_controller = new menu_fsm.Controller()
-    this.menu_controller.changeState(menu_fsm.Start)
     this.menu_controller.application = this
+    this.menu_controller.changeState(menu_fsm.Start)
+    this.menu_controller.next_controller = this.main_controller
+    this.main_controller.next_controller = this.view_controller
     this.states = []
     this.transitions = []
     this.panX = 0
@@ -182,13 +185,15 @@ Application.prototype.draw_content = function (controller) {
 Application.prototype.draw_menus = function (controller) {
     this.bar.draw(controller)
     if (this.debug) {
-        var from_right = 5
+        var from_right = 10
         noStroke()
         fill(0)
         var fps_string = 'fps: ' + frameRate().toFixed(0)
         text(fps_string, width - (from_right * textSize()), textSize())
-        text('state:' + this.state, width - (from_right * textSize()), textSize() * 2)
-        text('pcd:' + this.pointer_count_down, width - (from_right * textSize()), textSize() * 3)
+        text('main state:' + this.main_controller.state.constructor.name, width - (from_right * textSize()), textSize() * 2)
+        text('menu state:' + this.menu_controller.state.constructor.name, width - (from_right * textSize()), textSize() * 3)
+        text('view state:' + this.view_controller.state.constructor.name, width - (from_right * textSize()), textSize() * 4)
+        text('pcd:' + this.pointer_count_down, width - (from_right * textSize()), textSize() * 5)
     }
 
     if (this.pointer_count_down === null) {
@@ -221,10 +226,10 @@ Application.prototype.draw_menus = function (controller) {
 }
 
 Application.prototype.mouseWheel = function (event) {
-    this.view_controller.state.mouseWheel(this.view_controller, event)
+    this.menu_controller.state.mouseWheel(this.menu_controller, event)
 }
 Application.prototype.mouseDragged = function () {
-    this.view_controller.state.mouseDragged(this.view_controller)
+    this.menu_controller.state.mouseDragged(this.menu_controller)
 }
 Application.prototype.mousePressed = function () {
     this.menu_controller.state.mousePressed(this.menu_controller)

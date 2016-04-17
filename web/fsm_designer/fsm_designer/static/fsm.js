@@ -189,6 +189,14 @@ _Ready.prototype.mousePressed = function (controller) {
     controller.changeState(MenuWheel)
 }
 
+_Ready.prototype.mouseWheel = function (controller, event) {
+    controller.next_controller.state.mouseWheel(controller.next_controller, event)
+}
+
+_Ready.prototype.mouseDragged = function (controller) {
+    controller.next_controller.state.mouseDragged(controller.next_controller)
+}
+
 var Ready = new _Ready()
 exports.Ready = Ready
 
