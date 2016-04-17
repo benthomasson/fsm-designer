@@ -16,10 +16,16 @@ Controller.prototype.changeState = function (state) {
     }
 }
 function _State () {
-    _State.prototype.start = function (controller) {
-    }
-    _State.prototype.end = function (controller) {
-    }
+}
+_State.prototype.start = function (controller) {
+}
+_State.prototype.end = function (controller) {
+}
+_State.prototype.mousePressed = function (controller) {
+}
+_State.prototype.mouseWheel = function (controller) {
+}
+_State.prototype.mouseDragged = function (controller) {
 }
 var State = new _State()
 exports.State = State
@@ -178,15 +184,16 @@ function _Ready () {
 }
 inherits(_Ready, _State)
 
-// transition to ScaleAndPan
 // transition to SelectedTransition
 // transition to Selected
-// transition to MenuWheel
 _Ready.prototype.mousePressed = function (controller) {
-    controller.changeState(ScaleAndPan)
-    controller.changeState(SelectedTransition)
-    controller.changeState(Selected)
-    controller.changeState(MenuWheel)
+    controller.application.select_item()
+    if (controller.application.selected_state != null) {
+        controller.changeState(Selected)
+    }
+
+    // controller.changeState(SelectedTransition)
+    // controller.changeState(Selected)
 }
 
 _Ready.prototype.mouseWheel = function (controller, event) {
@@ -209,17 +216,23 @@ inherits(_Selected, _State)
 // transition to Move
 // transition to Edit
 _Selected.prototype.mousePressed = function (controller) {
-    controller.changeState(MenuWheel)
-    controller.changeState(Ready)
-    controller.changeState(Move)
-    controller.changeState(Edit)
+    // controller.changeState(MenuWheel)
+    // controller.changeState(Ready)
+    // controller.changeState(Move)
+    // controller.changeState(Edit)
+    if (controller.application.selected_state.is_selected(controller.application)) {
+        // do nothing
+    } else {
+        controller.changeState(Ready)
+        controller.state.mousePressed(controller)
+    }
 }
 
 // transition to Move
 // transition to NewTransition
 _Selected.prototype.mouseDragged = function (controller) {
-    controller.changeState(Move)
-    controller.changeState(NewTransition)
+    // controller.changeState(Move)
+    // controller.changeState(NewTransition)
 }
 
 var Selected = new _Selected()

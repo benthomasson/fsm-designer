@@ -112,7 +112,6 @@ function Application () {
     this.selected_state = null
     this.selected_transition = null
     this.debug = true
-    this.mouse_pointer = null
     this.active_widgets = []
     this.model = null
     this.app = null
@@ -160,6 +159,21 @@ function Application () {
     this.bar.y = 10
 }
 
+Application.prototype.select_item = function () {
+    this.selected_state = null
+    var i = 0
+    var state = null
+    for (i = 0; i < this.states.length; i++) {
+        state = this.states[i]
+        if (state.is_selected(this) && this.selected_state === null) {
+            state.selected = true
+            this.selected_state = state
+        } else {
+            state.selected = false
+        }
+    }
+}
+
 Application.prototype.save = function (button) {
 }
 
@@ -185,7 +199,7 @@ Application.prototype.draw_content = function (controller) {
 Application.prototype.draw_menus = function (controller) {
     this.bar.draw(controller)
     if (this.debug) {
-        var from_right = 10
+        var from_right = 20
         noStroke()
         fill(0)
         var fps_string = 'fps: ' + frameRate().toFixed(0)
@@ -194,6 +208,8 @@ Application.prototype.draw_menus = function (controller) {
         text('menu state:' + this.menu_controller.state.constructor.name, width - (from_right * textSize()), textSize() * 3)
         text('view state:' + this.view_controller.state.constructor.name, width - (from_right * textSize()), textSize() * 4)
         text('pcd:' + this.pointer_count_down, width - (from_right * textSize()), textSize() * 5)
+        text('X, Y:' + mouseX + ', ' + mouseY, width - (from_right * textSize()), textSize() * 6)
+        text('PX, PY:' + this.mousePX + ', ' + this.mousePY, width - (from_right * textSize()), textSize() * 7)
     }
 
     if (this.pointer_count_down === null) {

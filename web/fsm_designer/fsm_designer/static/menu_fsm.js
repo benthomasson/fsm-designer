@@ -104,11 +104,10 @@ _MenuReady.prototype.mousePressed = function (controller) {
                 mouseY > widget.top_extent() &&
                 mouseY < widget.bottom_extent()) {
             widget.mousePressed()
-            return false
+            return
         }
     }
-
-    return false
+    controller.next_controller.state.mousePressed(controller.next_controller)
 }
 
 _MenuReady.prototype.mouseReleased = function (controller) {

@@ -32,6 +32,8 @@ function setup () {
 
 function draw () {
     push()
+    application.mousePX = (mouseX - application.panX) / application.scaleXY
+    application.mousePY = (mouseY -application.panY) / application.scaleXY
     translate(application.panX, application.panY)
     scale(application.scaleXY)
     application.mouseSX = mouseX * 1 / application.scaleXY
