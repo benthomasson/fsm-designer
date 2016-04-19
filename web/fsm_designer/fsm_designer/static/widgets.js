@@ -278,3 +278,21 @@ ArrowMousePointer.prototype.draw = function () {
     pop()
 }
 exports.ArrowMousePointer = ArrowMousePointer
+
+function NewStatePointer () {
+    this.size = 100
+    this.label = 'New'
+}
+
+NewStatePointer.prototype.draw = function (application) {
+    var x = mouseX
+    var y = mouseY
+    stroke(settings.COLOR)
+    fill(settings.FILL)
+    ellipse(x, y, this.size * application.scaleXY, this.size * application.scaleXY)
+    noStroke()
+    fill(settings.COLOR)
+    textSize(settings.TEXT_SIZE * application.scaleXY)
+    text(this.label, x - textWidth(this.label) / 2, y)
+}
+exports.NewStatePointer = NewStatePointer

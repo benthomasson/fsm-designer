@@ -16,10 +16,12 @@ Controller.prototype.changeState = function (state) {
     }
 }
 function _State () {
-    _State.prototype.start = function (controller) {
-    }
-    _State.prototype.end = function (controller) {
-    }
+}
+_State.prototype.start = function (controller) {
+}
+_State.prototype.end = function (controller) {
+}
+_State.prototype.mouseReleased = function (controller) {
 }
 var State = new _State()
 exports.State = State
@@ -43,10 +45,11 @@ var ViewReady = new _ViewReady()
 
 _ViewReady.prototype.mouseDragged = function (controller) {
     controller.application.mousePointer = controller.application.MoveMousePointer
-    controller.application.pointer_count_down = null
+    controller.application.pointer_count_down = Math.floor(frameRate() / 2)
     controller.application.panX += mouseX - pmouseX
     controller.application.panY += mouseY - pmouseY
 }
+
 _ViewReady.prototype.mouseWheel = function (controller, event) {
     controller.application.mousePointer = controller.application.MagnifyingGlassMousePointer
     controller.application.pointer_count_down = Math.floor(frameRate() / 2)

@@ -263,6 +263,11 @@ _Ready.prototype.mouseDragged = function (controller) {
     controller.next_controller.state.mouseDragged(controller.next_controller)
 }
 
+_Ready.prototype.mouseReleased = function (controller) {
+    controller.next_controller.state.mouseReleased(controller.next_controller)
+}
+
+
 var Ready = new _Ready()
 exports.Ready = Ready
 

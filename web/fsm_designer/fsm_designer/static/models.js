@@ -196,6 +196,7 @@ function Application () {
     this.model = null
     this.app = null
     this.directory = null
+    this.NewStatePointer = new widgets.NewStatePointer()
     this.MoveMousePointer = new widgets.MoveMousePointer()
     this.MagnifyingGlassMousePointer = new widgets.MagnifyingGlassMousePointer()
     this.ArrowMousePointer = new widgets.ArrowMousePointer()
@@ -308,6 +309,7 @@ Application.prototype.draw_menus = function (controller) {
         text('PX, PY:' + this.mousePX + ', ' + this.mousePY, width - (from_right * textSize()), textSize() * 7)
         text('key:' + key, width - (from_right * textSize()), textSize() * 8)
         text('keyCode:' + keyCode, width - (from_right * textSize()), textSize() * 9)
+        text('mp:' + this.mousePointer.constructor.name, width - (from_right * textSize()), textSize() * 10)
     }
 
     if (this.pointer_count_down === null) {
@@ -320,7 +322,7 @@ Application.prototype.draw_menus = function (controller) {
     }
 
     if (this.mousePointer) {
-        this.mousePointer.draw()
+        this.mousePointer.draw(this)
     }
 
     var widget = null

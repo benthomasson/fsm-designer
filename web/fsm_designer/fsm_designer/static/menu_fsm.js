@@ -1,4 +1,5 @@
 var inherits = require('inherits')
+var models = require('./models.js')
 
 function Controller () {
     this.state = null
@@ -53,6 +54,17 @@ inherits(_NewState, _State)
 
 // transition to MenuReady
 _NewState.prototype.start = function (controller) {
+    controller.application.mousePointer = controller.application.NewStatePointer
+    console.log(controller.application.mousePointer.constructor.name)
+}
+
+_NewState.prototype.mousePressed = function (controller) {
+    controller.application.mousePointer = controller.application.ArrowMousePointer
+    var new_state = new models.FSMState()
+    new_state.x = controller.application.mousePX
+    new_state.y = controller.application.mousePY
+    new_state.label = controller.application.NewStatePointer.label
+    controller.application.states.push(new_state)
     controller.changeState(MenuReady)
 }
 
@@ -121,19 +133,15 @@ _MenuReady.prototype.mouseReleased = function (controller) {
             widget.mouseReleased()
         }
     }
-    controller.application.mousePointer = controller.application.ArrowMousePointer
-    controller.application.pointer_count_down = null
     controller.next_controller.state.mouseReleased(controller.next_controller)
 }
 
 _MenuReady.prototype.mouseWheel = function (controller, event) {
     controller.next_controller.state.mouseWheel(controller.next_controller, event)
 }
-
 _MenuReady.prototype.mouseDragged = function (controller) {
     controller.next_controller.state.mouseDragged(controller.next_controller)
 }
-
 _MenuReady.prototype.keyTyped = function (controller) {
     controller.next_controller.state.keyTyped(controller.next_controller)
 }
