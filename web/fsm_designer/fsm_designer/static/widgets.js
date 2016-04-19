@@ -259,9 +259,9 @@ MagnifyingGlassMousePointer.prototype.draw = function () {
 }
 exports.MagnifyingGlassMousePointer = MagnifyingGlassMousePointer
 
-function ArrowMousePointer (size = 20, color = '#5A5A5A') {
-    this.size = size
-    this.color = color
+function ArrowMousePointer () {
+    this.size = 20
+    this.color = '#5A5A5A'
 }
 
 ArrowMousePointer.prototype.draw = function () {
@@ -296,3 +296,27 @@ NewStatePointer.prototype.draw = function (application) {
     text(this.label, x - textWidth(this.label) / 2, y)
 }
 exports.NewStatePointer = NewStatePointer
+
+function NewTransitionPointer () {
+    this.size = 40
+    this.color = '#5A5A5A'
+}
+
+NewTransitionPointer.prototype.draw = function (application) {
+    var x = mouseX
+    var y = mouseY
+    strokeWeight(2)
+    noFill()
+    stroke(this.color)
+    push()
+    translate(x, y)
+    rotate(2 * PI / 3)
+    line(this.size, 0, 0, 0)
+    pop()
+    push()
+    translate(x, y)
+    line(-this.size / 5, 0, this.size / 5, 0)
+    line(0, -this.size / 5, 0, this.size / 5)
+    pop()
+}
+exports.NewTransitionPointer = NewTransitionPointer

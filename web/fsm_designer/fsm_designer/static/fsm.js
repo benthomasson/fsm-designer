@@ -267,7 +267,6 @@ _Ready.prototype.mouseReleased = function (controller) {
     controller.next_controller.state.mouseReleased(controller.next_controller)
 }
 
-
 var Ready = new _Ready()
 exports.Ready = Ready
 
@@ -283,6 +282,10 @@ _Selected.prototype.mousePressed = function (controller) {
     // controller.changeState(MenuWheel)
     // controller.changeState(Ready)
     // controller.changeState(Move)
+    if (controller.application.selected_state === null) {
+        controller.changeState(Ready)
+        controller.mousePressed(controller)
+    }
     if (controller.application.selected_state.is_selected(controller.application)) {
         controller.changeState(Edit)
     } else {
@@ -294,6 +297,10 @@ _Selected.prototype.mousePressed = function (controller) {
 // transition to Move
 // transition to NewTransition
 _Selected.prototype.mouseDragged = function (controller) {
+    if (controller.application.selected_state === null) {
+        controller.changeState(Ready)
+        controller.mousePressed(controller)
+    }
     controller.changeState(Move)
     controller.state.mouseDragged(controller)
 }

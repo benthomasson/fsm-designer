@@ -17,10 +17,14 @@ Controller.prototype.changeState = function (state) {
     }
 }
 function _State () {
-    _State.prototype.start = function (controller) {
-    }
-    _State.prototype.end = function (controller) {
-    }
+}
+_State.prototype.start = function (controller) {
+}
+_State.prototype.end = function (controller) {
+}
+_State.prototype.keyPressed = function (controller) {
+}
+_State.prototype.keyReleased = function (controller) {
 }
 var State = new _State()
 exports.State = State
@@ -55,7 +59,6 @@ inherits(_NewState, _State)
 // transition to MenuReady
 _NewState.prototype.start = function (controller) {
     controller.application.mousePointer = controller.application.NewStatePointer
-    console.log(controller.application.mousePointer.constructor.name)
 }
 
 _NewState.prototype.mousePressed = function (controller) {
@@ -77,11 +80,55 @@ inherits(_NewTransition, _State)
 
 // transition to MenuReady
 _NewTransition.prototype.start = function (controller) {
-    controller.changeState(MenuReady)
+    controller.application.mousePointer = controller.application.NewTransitionPointer
+}
+
+_NewTransition.prototype.mousePressed = function (controller) {
+    controller.application.select_state()
+    if (controller.application.selected_state) {
+        controller.changeState(ConnectTransition)
+    } else {
+        controller.application.mousePointer = controller.application.ArrowMousePointer
+        controller.changeState(MenuReady)
+    }
 }
 
 var NewTransition = new _NewTransition()
 exports.NewTransition = NewTransition
+
+function _ConnectTransition () {
+}
+inherits(_ConnectTransition, _State)
+
+_ConnectTransition.prototype.start = function (controller) {
+    var new_transition = new models.FSMTransition()
+    new_transition.selected = true
+    new_transition.from_state = controller.application.selected_state
+    controller.application.selected_state.selected = false
+    controller.application.selected_state = null
+    controller.application.selected_transition = new_transition
+    controller.application.transitions.push(new_transition)
+}
+
+_ConnectTransition.prototype.mousePressed = function (controller) {
+    controller.application.select_state()
+    if (controller.application.selected_state) {
+        controller.application.selected_transition.to_state = controller.application.selected_state
+        controller.application.selected_state.selected = false
+        controller.application.selected_state = null
+        controller.application.selected_transition.selected = false
+        controller.application.selected_transition = null
+        controller.application.mousePointer = controller.application.ArrowMousePointer
+        controller.changeState(MenuReady)
+    } else {
+        controller.application.transitions.pop()
+        controller.application.mousePointer = controller.application.ArrowMousePointer
+        controller.changeState(MenuReady)
+    }
+}
+
+var ConnectTransition = new _ConnectTransition()
+exports.ConnectTransition = ConnectTransition
 
 function _MenuReady () {
 }

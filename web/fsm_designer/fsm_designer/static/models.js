@@ -197,6 +197,7 @@ function Application () {
     this.app = null
     this.directory = null
     this.NewStatePointer = new widgets.NewStatePointer()
+    this.NewTransitionPointer = new widgets.NewTransitionPointer()
     this.MoveMousePointer = new widgets.MoveMousePointer()
     this.MagnifyingGlassMousePointer = new widgets.MagnifyingGlassMousePointer()
     this.ArrowMousePointer = new widgets.ArrowMousePointer()
@@ -245,12 +246,10 @@ Application.prototype.scaleAndPan = function () {
     scale(this.scaleXY)
 }
 
-Application.prototype.select_item = function () {
+Application.prototype.select_state = function () {
     this.selected_state = null
-    this.selected_transition = null
     var i = 0
     var state = null
-    var transition = null
     for (i = 0; i < this.states.length; i++) {
         state = this.states[i]
         if (state.is_selected(this) && this.selected_state === null) {
@@ -260,6 +259,13 @@ Application.prototype.select_item = function () {
             state.selected = false
         }
     }
+}
+
+Application.prototype.select_item = function () {
+    this.select_state()
+    this.selected_transition = null
+    var i = 0
+    var transition = null
     for (i = 0; i < this.transitions.length; i++) {
         transition = this.transitions[i]
         if (transition.is_selected(this) && this.selected_state === null) {
