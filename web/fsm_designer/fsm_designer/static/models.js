@@ -13,6 +13,12 @@ function FSMState () {
     this.edit = false
     this.label_offset = 0
 }
+FSMState.prototype.exportState = function () {
+    return {x: this.x,
+            y: this.y,
+            label: this.label,
+            size: this.size}
+}
 FSMState.prototype.draw = function (controller) {
     stroke(settings.COLOR)
     fill(settings.FILL)
@@ -43,6 +49,11 @@ function FSMTransition () {
     this.label = ''
     this.selected = false
     this.edit = false
+}
+FSMTransition.prototype.exportTransition = function () {
+    return {from_state: this.from_state.label,
+            to_state: this.to_state.label,
+            label: this.label}
 }
 FSMTransition.prototype.is_selected = function (controller) {
     var x1 = this.from_state.x
@@ -174,6 +185,7 @@ function Application () {
     this.menu_controller.changeState(menu_fsm.Start)
     this.menu_controller.next_controller = this.main_controller
     this.main_controller.next_controller = this.view_controller
+    this.socket = null
     this.states = []
     this.transitions = []
     this.panX = 0
@@ -239,6 +251,32 @@ function Application () {
 
     this.bar.x = 10
     this.bar.y = 10
+    this.last_saved_url = null
+}
+
+Application.prototype.on_saved = function (message) {
+    this.menu_controller.state.on_saved(this.menu_controller, message)
+}
+
+Application.prototype.exportFSM = function () {
+    var states = []
+    var transitions = []
+
+    var state = null
+    var transition = null
+    var i = 0
+
+    for (i = 0; i < this.states.length; i++) {
+        state = this.states[i]
+        states.push(state.exportState())
+    }
+
+    for (i = 0; i < this.transitions.length; i++) {
+        transition = this.transitions[i]
+        transitions.push(transition.exportTransition())
+    }
+
+    return {states: states, transitions: transitions}
 }
 
 Application.prototype.scaleAndPan = function () {

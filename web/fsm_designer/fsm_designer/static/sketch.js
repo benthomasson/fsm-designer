@@ -3,6 +3,11 @@ console.log(main)
 
 var application = new main.models.Application()
 var socket = io.connect('/fsm-designer')
+application.socket = socket
+
+socket.on('saved', function (message) {
+    application.on_saved(message)
+})
 
 var state = new main.models.FSMState()
 var state2 = new main.models.FSMState()

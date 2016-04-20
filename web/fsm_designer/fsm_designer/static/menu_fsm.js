@@ -208,9 +208,31 @@ inherits(_Save, _State)
 
 // transition to MenuReady
 _Save.prototype.start = function (controller) {
-    controller.changeState(MenuReady)
+    console.log(controller.application.exportFSM())
+    controller.application.socket.emit('save', controller.application.exportFSM())
+}
+
+_Save.prototype.on_saved = function (controller, message) {
+    console.log(message)
+    controller.application.last_saved_url = message.url
+    controller.changeState(Saved)
 }
 
 var Save = new _Save()
 exports.Save = Save
 
+function _Saved () {
+}
+inherits(_Saved, _State)
+
+// transition to MenuReady
+_Saved.prototype.start = function (controller) {
+    if (controller.application.last_saved_url != null) {
+        window.open(controller.application.last_saved_url)
+        controller.application.last_saved_url = null
+    }
+    controller.changeState(MenuReady)
+}
+
+var Saved = new _Saved()
+exports.Saved = Saved
