@@ -185,6 +185,7 @@ function Application () {
     this.menu_controller.changeState(menu_fsm.Start)
     this.menu_controller.next_controller = this.main_controller
     this.main_controller.next_controller = this.view_controller
+    this.fsm_to_load = null
     this.socket = null
     this.states = []
     this.transitions = []
@@ -252,6 +253,50 @@ function Application () {
     this.bar.x = 10
     this.bar.y = 10
     this.last_saved_url = null
+}
+
+Application.prototype.get_state_by_name = function (name) {
+    var i = 0
+    var state = null
+
+    for (i = 0; i < this.states.length; i++) {
+        state = this.states[i]
+        if (state.label === name) {
+            return state
+        }
+    }
+
+    return null
+}
+
+Application.prototype.load_fsm = function (fsm_to_load) {
+    var states = fsm_to_load.states
+    var transitions = fsm_to_load.transitions
+    var new_state = null
+    var state = null
+    var new_transition = null
+    var transition = null
+
+    var i = 0
+
+    for (i = 0; i < states.length; i++) {
+        state = states[i]
+        new_state = new FSMState()
+        new_state.label = state.label
+        new_state.x = state.x
+        new_state.y = state.y
+        new_state.size = state.size
+        this.states.push(new_state)
+    }
+
+    for (i = 0; i < transitions.length; i++) {
+        transition = transitions[i]
+        new_transition = new FSMTransition()
+        new_transition.label = transition.label
+        new_transition.to_state = this.get_state_by_name(transition.to_state)
+        new_transition.from_state = this.get_state_by_name(transition.from_state)
+        this.transitions.push(new_transition)
+    }
 }
 
 Application.prototype.on_saved = function (message) {

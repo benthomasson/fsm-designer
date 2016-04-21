@@ -46,6 +46,7 @@ inherits(_Load, _State)
 
 // transition to MenuReady
 _Load.prototype.start = function (controller) {
+    window.open('/static/upload.html')
     controller.changeState(MenuReady)
 }
 

@@ -1,4 +1,4 @@
-/* global main */
+/* global main fsm_to_load*/
 console.log(main)
 
 var application = new main.models.Application()
@@ -9,33 +9,18 @@ socket.on('saved', function (message) {
     application.on_saved(message)
 })
 
-var state = new main.models.FSMState()
-var state2 = new main.models.FSMState()
-var transition = new main.models.FSMTransition()
-
 function setup () {
     createCanvas(windowWidth, windowHeight)
     noCursor()
 
-    state.x = 100
-    state.y = 100
-    state.label = 'Foo'
-
-    state2.x = 300
-    state2.y = 100
-    state2.label = 'Bar'
-
-    transition.from_state = state
-    transition.to_state = state2
-    transition.label = 'foobar'
-
-    application.states.push(state)
-    application.states.push(state2)
-
-    application.transitions.push(transition)
+    application.fsm_to_load = fsm_to_load
 }
 
 function draw () {
+    if (application.fsm_to_load) {
+        application.load_fsm(fsm_to_load)
+        application.fsm_to_load = null
+    }
     clear()
     push()
     application.mousePX = (mouseX - application.panX) / application.scaleXY
