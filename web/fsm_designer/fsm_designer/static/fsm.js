@@ -47,6 +47,8 @@ inherits(_Load, _State)
 _Load.prototype.fileSelected = function (controller) {
     controller.changeState(Ready)
 }
+_Load.prototype.fileSelected.transitions = []
+_Load.prototype.fileSelected.transitions.push('Ready')
 
 var Load = new _Load()
 exports.Load = Load

@@ -270,12 +270,28 @@ Application.prototype.get_state_by_name = function (name) {
 }
 
 Application.prototype.load_fsm = function (fsm_to_load) {
-    var states = fsm_to_load.states
-    var transitions = fsm_to_load.transitions
+    var states = []
+    var transitions = []
     var new_state = null
     var state = null
     var new_transition = null
     var transition = null
+
+    if (typeof fsm_to_load.states !== 'undefined') {
+        states = fsm_to_load.states
+    }
+    if (typeof fsm_to_load.transitions !== 'undefined') {
+        transitions = fsm_to_load.transitions
+    }
+    if (typeof fsm_to_load.panX !== 'undefined') {
+        this.panX = fsm_to_load.panX
+    }
+    if (typeof fsm_to_load.panY !== 'undefined') {
+        this.panY = fsm_to_load.panY
+    }
+    if (typeof fsm_to_load.scaleXY !== 'undefined') {
+        this.scaleXY = fsm_to_load.scaleXY
+    }
 
     var i = 0
 
@@ -321,7 +337,11 @@ Application.prototype.exportFSM = function () {
         transitions.push(transition.exportTransition())
     }
 
-    return {states: states, transitions: transitions}
+    return {states: states,
+            transitions: transitions,
+            panX: this.panX,
+            panY: this.panY,
+            scaleXY: this.scaleXY}
 }
 
 Application.prototype.scaleAndPan = function () {
