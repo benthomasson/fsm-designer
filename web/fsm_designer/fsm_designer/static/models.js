@@ -204,7 +204,7 @@ function Application () {
     this.wheel = null
     this.selected_state = null
     this.selected_transition = null
-    this.debug = false
+    this.debug = true
     this.active_widgets = []
     this.model = null
     this.app = null
@@ -259,6 +259,19 @@ Application.prototype.remove_state = function (state) {
     var index = this.states.indexOf(state)
     if (index > -1) {
         this.states.splice(index, 1)
+    }
+    var i = 0
+    var transition = null
+    var transitions = this.transitions.slice(0)
+
+    for (i = 0; i < transitions.length; i++) {
+        transition = transitions[i]
+        if (transition.to_state === state) {
+            this.remove_transition(transition)
+        }
+        if (transition.from_state === state) {
+            this.remove_transition(transition)
+        }
     }
 }
 
@@ -369,29 +382,43 @@ Application.prototype.select_state = function () {
     var state = null
     for (i = 0; i < this.states.length; i++) {
         state = this.states[i]
+        state.selected = false
+    }
+    for (i = 0; i < this.states.length; i++) {
+        state = this.states[i]
         if (state.is_selected(this) && this.selected_state === null) {
             state.selected = true
             this.selected_state = state
+            return true
         } else {
             state.selected = false
         }
     }
+    return false
 }
 
 Application.prototype.select_item = function () {
-    this.select_state()
+    if (this.select_state()) {
+        return true
+    }
     this.selected_transition = null
     var i = 0
     var transition = null
     for (i = 0; i < this.transitions.length; i++) {
         transition = this.transitions[i]
+        transition.selected = false
+    }
+    for (i = 0; i < this.transitions.length; i++) {
+        transition = this.transitions[i]
         if (transition.is_selected(this) && this.selected_state === null) {
             transition.selected = true
             this.selected_transition = transition
+            return true
         } else {
             transition.selected = false
         }
     }
+    return false
 }
 
 Application.prototype.save = function (button) {

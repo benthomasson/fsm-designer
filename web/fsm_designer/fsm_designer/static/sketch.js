@@ -60,12 +60,20 @@ function mouseDragged () {
 }
 
 function keyTyped () {
-    application.keyTyped()
+    try {
+        application.keyTyped()
+    } catch (err) {
+        console.log(err)
+    }
     return false
 }
 
 function keyPressed () {
-    application.keyPressed()
+    try {
+        application.keyPressed()
+    } catch (err) {
+        console.log(err)
+    }
     // Prevent Chrome from using backspace for go to the last page.
     if (keyCode === BACKSPACE) {
         return false

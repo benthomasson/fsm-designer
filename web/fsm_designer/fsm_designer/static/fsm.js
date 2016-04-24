@@ -85,8 +85,12 @@ _SelectedTransition.prototype.keyPressed = function (controller) {
     console.log('keyPressed')
     if (keyCode === BACKSPACE) {
         controller.application.remove_transition(controller.application.selected_transition)
+        controller.application.selected_transition = null
+        controller.changeState(Ready)
     } else if (keyCode === DELETE) {
         controller.application.remove_transition(controller.application.selected_transition)
+        controller.application.selected_transition = null
+        controller.changeState(Ready)
     }
 }
 
@@ -320,8 +324,12 @@ _Selected.prototype.keyPressed = function (controller) {
     console.log('keyPressed')
     if (keyCode === BACKSPACE) {
         controller.application.remove_state(controller.application.selected_state)
+        controller.application.selected_state = null
+        controller.changeState(Ready)
     } else if (keyCode === DELETE) {
         controller.application.remove_state(controller.application.selected_state)
+        controller.application.selected_state = null
+        controller.changeState(Ready)
     }
 }
 
