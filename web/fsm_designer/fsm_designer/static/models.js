@@ -204,7 +204,7 @@ function Application () {
     this.wheel = null
     this.selected_state = null
     this.selected_transition = null
-    this.debug = true
+    this.debug = false
     this.active_widgets = []
     this.model = null
     this.app = null
@@ -253,6 +253,20 @@ function Application () {
     this.bar.x = 10
     this.bar.y = 10
     this.last_saved_url = null
+}
+
+Application.prototype.remove_state = function (state) {
+    var index = this.states.indexOf(state)
+    if (index > -1) {
+        this.states.splice(index, 1)
+    }
+}
+
+Application.prototype.remove_transition = function (transitions) {
+    var index = this.transitions.indexOf(transitions)
+    if (index > -1) {
+        this.transitions.splice(index, 1)
+    }
 }
 
 Application.prototype.get_state_by_name = function (name) {

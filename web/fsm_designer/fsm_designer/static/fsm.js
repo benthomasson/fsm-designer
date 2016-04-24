@@ -81,6 +81,15 @@ _SelectedTransition.prototype.mousePressed = function (controller) {
     }
 }
 
+_SelectedTransition.prototype.keyPressed = function (controller) {
+    console.log('keyPressed')
+    if (keyCode === BACKSPACE) {
+        controller.application.remove_transition(controller.application.selected_transition)
+    } else if (keyCode === DELETE) {
+        controller.application.remove_transition(controller.application.selected_transition)
+    }
+}
+
 var SelectedTransition = new _SelectedTransition()
 exports.SelectedTransition = SelectedTransition
 
@@ -305,6 +314,15 @@ _Selected.prototype.mouseDragged = function (controller) {
     }
     controller.changeState(Move)
     controller.state.mouseDragged(controller)
+}
+
+_Selected.prototype.keyPressed = function (controller) {
+    console.log('keyPressed')
+    if (keyCode === BACKSPACE) {
+        controller.application.remove_state(controller.application.selected_state)
+    } else if (keyCode === DELETE) {
+        controller.application.remove_state(controller.application.selected_state)
+    }
 }
 
 var Selected = new _Selected()
