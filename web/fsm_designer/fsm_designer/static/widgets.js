@@ -320,3 +320,68 @@ NewTransitionPointer.prototype.draw = function (application) {
     pop()
 }
 exports.NewTransitionPointer = NewTransitionPointer
+
+function TextField (x, y, label, text_size = 20, size = 20, color = '#5A5A5A', fill = '#B9B9B9', pressed_color = '#7F7F7F', call_back = null) {
+    this.x = x
+    this.y = y
+    this.text_size = text_size
+    this.label = label
+    this.color = color
+    this.fill = fill
+    this.size = size
+    this.pressed_color = pressed_color
+    this.state = button_fsm.NotPressed
+    this.pressed = false
+    this.active = false
+    this.edit = false
+    this.call_back = call_back
+    this.selected = false
+    this.object = null
+    this.property = null
+}
+
+inherits(TextField, Button)
+
+TextField.prototype.right_extent = function () {
+    textSize(this.text_size)
+    return this.x + textWidth(this.label + (this.edit ? '_' : '')) + this.size
+}
+
+TextField.prototype.draw_button = function () {
+    push()
+    translate(this.x, this.y)
+    if (this.selected) {
+        stroke(settings.SELECTED_COLOR)
+    } else {
+        stroke(this.fill)
+    }
+    fill(this.fill)
+    textSize(this.text_size)
+    rect(0, 0, this.width(), this.height(), this.size / 5)
+    pop()
+}
+
+TextField.prototype.draw_label = function () {
+    push()
+    translate(this.x, this.y)
+    textSize(this.text_size)
+    translate((textWidth(this.label) + this.size) / 2,
+              (this.size + this.text_size) / 2 - this.text_size / 4)
+    textAlign(CENTER, CENTER)
+    fill(this.color)
+    if (this.edit) {
+        text(this.label + '_', 0, 0)
+    } else {
+        text(this.label, 0, 0)
+    }
+    pop()
+    textAlign(LEFT, BASELINE)
+}
+TextField.prototype.is_selected = function (controller) {
+    return ((this.top_extent() < mouseY) &&
+            (this.bottom_extent() > mouseY) &&
+            (this.left_extent() < mouseX) &&
+            (this.right_extent() > mouseX))
+}
+
+exports.TextField = TextField

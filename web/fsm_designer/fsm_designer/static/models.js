@@ -204,8 +204,10 @@ function Application () {
     this.wheel = null
     this.selected_state = null
     this.selected_transition = null
+    this.selected_property = null
     this.debug = true
     this.active_widgets = []
+    this.properties = []
     this.model = null
     this.app = null
     this.directory = null
@@ -251,8 +253,18 @@ function Application () {
     }
 
     this.bar.x = 10
-    this.bar.y = 10
+    this.bar.y = 60
     this.last_saved_url = null
+
+    this.app_property_field = new widgets.TextField()
+    this.app_property_field.x = 10
+    this.app_property_field.y = 10
+    this.app_property_field.label = 'fsm'
+    this.app_property_field.object = this
+    this.app_property_field.property = 'app'
+
+
+    this.properties.push(this.app_property_field)
 }
 
 Application.prototype.remove_state = function (state) {
@@ -319,6 +331,10 @@ Application.prototype.load_fsm = function (fsm_to_load) {
     if (typeof fsm_to_load.scaleXY !== 'undefined') {
         this.scaleXY = fsm_to_load.scaleXY
     }
+    if (typeof fsm_to_load.app !== 'undefined') {
+        this.app = fsm_to_load.app
+        this.app_property_field.label = fsm_to_load.app
+    }
 
     var i = 0
 
@@ -368,7 +384,8 @@ Application.prototype.exportFSM = function () {
             transitions: transitions,
             panX: this.panX,
             panY: this.panY,
-            scaleXY: this.scaleXY}
+            scaleXY: this.scaleXY,
+            app: this.app === null ? 'fsm' : this.app }
 }
 
 Application.prototype.scaleAndPan = function () {
@@ -380,10 +397,6 @@ Application.prototype.select_state = function () {
     this.selected_state = null
     var i = 0
     var state = null
-    for (i = 0; i < this.states.length; i++) {
-        state = this.states[i]
-        state.selected = false
-    }
     for (i = 0; i < this.states.length; i++) {
         state = this.states[i]
         if (state.is_selected(this) && this.selected_state === null) {
@@ -398,19 +411,63 @@ Application.prototype.select_state = function () {
 }
 
 Application.prototype.select_item = function () {
+    this.clear_selections()
+    if (this.select_property()) {
+        return true
+    }
     if (this.select_state()) {
         return true
     }
+    if (this.select_transition()) {
+        return true
+    }
+}
+
+Application.prototype.clear_selections = function () {
+    var i = 0
+    var state = null
+    var transition = null
+    var property = null
+    for (i = 0; i < this.states.length; i++) {
+        state = this.states[i]
+        state.selected = false
+    }
+
+    for (i = 0; i < this.transitions.length; i++) {
+        transition = this.transitions[i]
+        transition.selected = false
+    }
+
+    for (i = 0; i < this.properties.length; i++) {
+        property = this.properties[i]
+        property.selected = false
+    }
+}
+
+Application.prototype.select_property = function () {
+    this.selected_property = null
+    var i = 0
+    var property = null
+    for (i = 0; i < this.properties.length; i++) {
+        property = this.properties[i]
+        if (property.is_selected(this)) {
+            property.selected = true
+            this.selected_property = property
+            return true
+        } else {
+            property.selected = false
+        }
+    }
+    return false
+}
+
+Application.prototype.select_transition = function () {
     this.selected_transition = null
     var i = 0
     var transition = null
     for (i = 0; i < this.transitions.length; i++) {
         transition = this.transitions[i]
-        transition.selected = false
-    }
-    for (i = 0; i < this.transitions.length; i++) {
-        transition = this.transitions[i]
-        if (transition.is_selected(this) && this.selected_state === null) {
+        if (transition.is_selected(this)) {
             transition.selected = true
             this.selected_transition = transition
             return true
@@ -445,6 +502,7 @@ Application.prototype.draw_content = function (controller) {
 
 Application.prototype.draw_menus = function (controller) {
     this.bar.draw(controller)
+    this.app_property_field.draw(controller)
     if (this.debug) {
         var from_right = 20
         noStroke()

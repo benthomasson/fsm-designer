@@ -263,7 +263,9 @@ inherits(_Ready, _State)
 // transition to Selected
 _Ready.prototype.mousePressed = function (controller) {
     controller.application.select_item()
-    if (controller.application.selected_state != null) {
+    if (controller.application.selected_property != null) {
+        controller.changeState(EditProperty)
+    } else if (controller.application.selected_state != null) {
         controller.changeState(Selected)
     } else if (controller.application.selected_transition != null) {
         controller.changeState(SelectedTransition)
@@ -387,3 +389,55 @@ _EditTransition.prototype.mousePressed = function (controller) {
 var EditTransition = new _EditTransition()
 exports.EditTransition = EditTransition
 
+function _EditProperty () {
+}
+inherits(_EditProperty, _State)
+
+_EditProperty.prototype.start = function (controller) {
+    controller.application.selected_property.edit = true
+}
+
+_EditProperty.prototype.end = function (controller) {
+    controller.application.selected_property.object[controller.application.selected_property.property] = controller.application.selected_property.label
+    controller.application.selected_property.edit = false
+    controller.application.selected_property.selected = false
+    controller.application.selected_property = null
+}
+
+// transition to Ready
+_EditProperty.prototype.keyTyped = function (controller) {
+    if (this.handle_special_keys(controller)) {
+        // do nothing
+    } else {
+        controller.application.selected_property.label += key
+    }
+}
+
+_EditProperty.prototype.handle_special_keys = function (controller) {
+    if (keyCode === RETURN) {
+        controller.changeState(Ready)
+        return true
+    } else if (keyCode === ENTER) {
+        controller.changeState(Ready)
+        return true
+    } else if (keyCode === BACKSPACE) {
+        controller.application.selected_property.label = controller.application.selected_property.label.substring(0, controller.application.selected_property.label.length - 1)
+        return true
+    } else if (keyCode === DELETE) {
+        controller.application.selected_property.label = controller.application.selected_property.label.substring(0, controller.application.selected_property.label.length - 1)
+        return true
+    } else {
+        return false
+    }
+}
+
+_EditProperty.prototype.keyPressed = _EditProperty.prototype.handle_special_keys
+
+// transition to Ready
+_EditProperty.prototype.mousePressed = function (controller) {
+    controller.changeState(Ready)
+    controller.state.mousePressed(controller)
+}
+
+var EditProperty = new _EditProperty()
+exports.EditProperty = EditProperty

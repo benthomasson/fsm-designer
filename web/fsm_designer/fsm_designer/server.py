@@ -47,9 +47,10 @@ class AgentNamespace(BaseNamespace, BroadcastMixin):
 
     def on_save(self, message):
         logger.debug("save %s", message)
+        app_name = message.get('app', 'fsm')
         data = yaml.safe_dump(message, default_flow_style=False)
         save_id = hashlib.sha1(data).hexdigest()
-        url = '/save/{0}/fsm.yml'.format(save_id)
+        url = '/save/{0}/{1}.yml'.format(save_id, app_name)
         with open(os.path.join(saved_fsms_root, save_id), 'w') as f:
             f.write(data)
         self.emit('saved', dict(url=url))
@@ -79,10 +80,10 @@ def index(namespace):
     socketio_manage(request.environ, {'/fsm-designer': AgentNamespace})
 
 
-@route('/save/<save_id:path>/fsm.yml')
-def save(save_id):
+@route('/save/<save_id:path>/<name:path>')
+def save(save_id, name):
     logger.debug("save_id %s", save_id)
-    return static_file(save_id, root=saved_fsms_root, mimetype="text/yaml", download="fsm.yml")
+    return static_file(save_id, root=saved_fsms_root, mimetype="text/yaml", download=name)
 
 
 @route('/')
