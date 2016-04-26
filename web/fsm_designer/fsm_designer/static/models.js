@@ -263,7 +263,6 @@ function Application () {
     this.app_property_field.object = this
     this.app_property_field.property = 'app'
 
-
     this.properties.push(this.app_property_field)
 }
 

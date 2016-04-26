@@ -2,7 +2,10 @@ var inherits = require('inherits')
 var settings = require('./settings.js')
 var button_fsm = require('./button_fsm.js')
 
-function arrow (x1, y1, x2, y2, arrow_offset, label = '', selected = false, label_offset = 0) {
+function arrow (x1, y1, x2, y2, arrow_offset, _label, _selected, _label_offset) {
+    var label = (typeof _label !== 'undefined' ? _label : '')
+    var selected = (typeof _selected !== 'undefined' ? _selected : false)
+    var label_offset = (typeof _label_offset !== 'undefined' ? _label_offset : 0)
     if (selected) {
         strokeWeight(6)
         stroke(settings.SELECTED_COLOR)
@@ -67,19 +70,19 @@ Widget.prototype.right_extent = function () {
     return 0
 }
 
-function Button (x, y, label, text_size = 20, size = 20, color = '#5A5A5A', fill = '#B9B9B9', pressed_color = '#7F7F7F', call_back = null) {
+function Button (x, y, label, text_size, size, color, fill, pressed_color, call_back) {
     this.x = x
     this.y = y
-    this.text_size = text_size
+    this.text_size = (typeof text_size !== 'undefined' ? text_size : 20)
     this.label = label
-    this.color = color
-    this.fill = fill
-    this.size = size
-    this.pressed_color = pressed_color
+    this.color = (typeof color !== 'undefined' ? color : '#5A5A5A')
+    this.fill = (typeof fill !== 'undefined' ? fill : '#B9B9B9')
+    this.size = (typeof size !== 'undefined' ? size : 20)
+    this.pressed_color = (typeof pressed_color !== 'undefined' ? pressed_color : '#7F7F7F')
     this.state = button_fsm.NotPressed
     this.pressed = false
     this.active = false
-    this.call_back = call_back
+    this.call_back = (typeof call_back !== 'undefined' ? call_back : null)
 }
 
 inherits(Button, button_fsm.Controller)
@@ -160,18 +163,19 @@ Button.prototype.draw_label = function () {
 }
 
 exports.Button = Button
-function button (x, y, label, text_size = 20, size = 20, color = '#5A5A5A', fill = '#B9B9B9') {
+function button (x, y, label, text_size, size, color, fill) {
     return Button(x, y, label, text_size, size, color, fill).draw()
 }
 exports.button = button
 
-function ButtonBar (buttons, x = 0, y = 0, size = 50, color = '#5A5A5A', fill = '#B9B9B9', padding = 5) {
+function ButtonBar (buttons, x, y, size, color, fill, padding) {
     this.x = x
-    this.y = y
-    this.color = color
-    this.fill = fill
-    this.size = size
-    this.padding = padding
+    this.x = (typeof x !== 'undefined' ? x : 0)
+    this.y = (typeof y !== 'undefined' ? y : 0)
+    this.size = (typeof size !== 'undefined' ? size : 50)
+    this.color = (typeof color !== 'undefined' ? color : '#5A5A5A')
+    this.fill = (typeof fill !== 'undefined' ? fill : '#B9B9B9')
+    this.padding = (typeof padding !== 'undefined' ? padding : 5)
     this.buttons = []
     this.buttons.concat(buttons)
 }
@@ -200,9 +204,9 @@ ButtonBar.prototype.draw = function () {
 }
 exports.ButtonBar = ButtonBar
 
-function MoveMousePointer (size = 20, color = '#5A5A5A') {
-    this.size = size
-    this.color = color
+function MoveMousePointer (size, color) {
+    this.size = (typeof size !== 'undefined' ? size : 20)
+    this.color = (typeof color !== 'undefined' ? color : '#5A5A5A')
 }
 
 MoveMousePointer.prototype.draw = function () {
@@ -225,9 +229,9 @@ MoveMousePointer.prototype.draw = function () {
 }
 exports.MoveMousePointer = MoveMousePointer
 
-function MagnifyingGlassMousePointer (size = 20, color = '#5A5A5A') {
-    this.size = size
-    this.color = color
+function MagnifyingGlassMousePointer (size, color) {
+    this.size = (typeof size !== 'undefined' ? size : 20)
+    this.color = (typeof color !== 'undefined' ? color : '#5A5A5A')
 }
 
 MagnifyingGlassMousePointer.prototype.draw = function () {
@@ -321,20 +325,20 @@ NewTransitionPointer.prototype.draw = function (application) {
 }
 exports.NewTransitionPointer = NewTransitionPointer
 
-function TextField (x, y, label, text_size = 20, size = 20, color = '#5A5A5A', fill = '#B9B9B9', pressed_color = '#7F7F7F', call_back = null) {
+function TextField (x, y, label, text_size, size, color, fill, pressed_color, call_back) {
     this.x = x
     this.y = y
-    this.text_size = text_size
     this.label = label
-    this.color = color
-    this.fill = fill
-    this.size = size
-    this.pressed_color = pressed_color
+    this.text_size = (typeof text_size !== 'undefined' ? text_size : 20)
+    this.size = (typeof size !== 'undefined' ? size : 20)
+    this.color = (typeof color !== 'undefined' ? color : '#5A5A5A')
+    this.fill = (typeof fill !== 'undefined' ? fill : '#B9B9B9')
+    this.pressed_color = (typeof pressed_color !== 'undefined' ? pressed_color : '#7F7F7F')
+    this.call_back = (typeof call_back !== 'undefined' ? call_back : null)
     this.state = button_fsm.NotPressed
     this.pressed = false
     this.active = false
     this.edit = false
-    this.call_back = call_back
     this.selected = false
     this.object = null
     this.property = null
