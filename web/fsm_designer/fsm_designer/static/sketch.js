@@ -27,13 +27,26 @@ function draw () {
     application.mousePY = (mouseY - application.panY) / application.scaleXY
     translate(application.panX, application.panY)
     scale(application.scaleXY)
-    application.mouseSX = mouseX * 1 / application.scaleXY
-    application.mouseSY = mouseY * 1 / application.scaleXY
     background(255)
     fill(255)
     application.draw_content(application)
     pop()
     application.draw_menus(application)
+    if (application.debug) {
+        stroke('yellow')
+        line(mouseX - 10, mouseY, mouseX + 10, mouseY)
+        line(mouseX, mouseY - 10, mouseX, mouseY + 10)
+        stroke('#66FFFF')
+        line(pmouseX - 10, pmouseY, pmouseX + 10, pmouseY)
+        line(pmouseX, pmouseY - 10, pmouseX, pmouseY + 10)
+
+        translate(application.panX, application.panY)
+        scale(application.scaleXY)
+
+        stroke('red')
+        line(application.mousePX - 10, application.mousePY, application.mousePX + 10, application.mousePY)
+        line(application.mousePX, application.mousePY - 10, application.mousePX, application.mousePY + 10)
+    }
 }
 
 function windowResized () {

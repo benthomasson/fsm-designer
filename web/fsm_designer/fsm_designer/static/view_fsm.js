@@ -104,7 +104,6 @@ _Pan.prototype.count_down_done = function (controller) {
 }
 exports.Pan = Pan
 
-
 function _Scale () {
 }
 inherits(_Scale, _State)
@@ -120,13 +119,16 @@ _Scale.prototype.end = function (controller) {
 _Scale.prototype.mouseWheel = function (controller, event) {
     controller.application.mousePointer = controller.application.MagnifyingGlassMousePointer
     controller.application.pointer_count_down = Math.floor(frameRate() / 2)
-    controller.application.scaleXY = controller.application.scaleXY + event.delta / 100
+    var delta = event.delta / 100
+    controller.application.scaleXY = controller.application.scaleXY + delta
     if (controller.application.scaleXY < 0.2) {
         controller.application.scaleXY = 0.2
     }
     if (controller.application.scaleXY > 10) {
         controller.application.scaleXY = 10
     }
+    controller.application.panX = mouseX - controller.application.scaleXY * controller.application.mousePX
+    controller.application.panY = mouseY - controller.application.scaleXY * controller.application.mousePY
 }
 _Scale.prototype.mouseDragged = function (controller) {
     controller.changeState(ViewReady)

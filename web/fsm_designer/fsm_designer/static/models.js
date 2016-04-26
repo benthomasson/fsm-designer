@@ -195,8 +195,6 @@ function Application () {
     this.oldPanY = 0
     this.scaleXY = 1.0
     this.oldScaleXY = 0
-    this.mouseSX = 0
-    this.mouseSY = 0
     this.mousePressedX = 0
     this.mousePressedY = 0
     this.lastKeyCode = 0
@@ -517,6 +515,8 @@ Application.prototype.draw_menus = function (controller) {
         text('key:' + key, width - (from_right * textSize()), textSize() * 8)
         text('keyCode:' + keyCode, width - (from_right * textSize()), textSize() * 9)
         text('mp:' + this.mousePointer.constructor.name, width - (from_right * textSize()), textSize() * 10)
+        text('panX, panY:' + this.panX + ', ' + this.panY, width - (from_right * textSize()), textSize() * 11)
+        text('scaleXY:' + this.scaleXY, width - (from_right * textSize()), textSize() * 12)
     }
 
     if (this.pointer_count_down === null) {
