@@ -23,6 +23,12 @@ _State.prototype.end = function (controller) {
 }
 _State.prototype.mouseReleased = function (controller) {
 }
+_State.prototype.mousePressed = function (controller) {
+}
+_State.prototype.count_down_done = function (controller) {
+}
+_State.prototype.mouseWheel = function (controller) {
+}
 var State = new _State()
 exports.State = State
 exports._State = _State
@@ -44,13 +50,74 @@ inherits(_ViewReady, _State)
 var ViewReady = new _ViewReady()
 
 _ViewReady.prototype.mouseDragged = function (controller) {
-    controller.application.mousePointer = controller.application.MoveMousePointer
-    controller.application.pointer_count_down = Math.floor(frameRate() / 2)
-    controller.application.panX += mouseX - pmouseX
-    controller.application.panY += mouseY - pmouseY
+    controller.changeState(Pan)
+    controller.state.mouseDragged(controller)
 }
 
 _ViewReady.prototype.mouseWheel = function (controller, event) {
+    controller.changeState(Scale)
+    controller.state.mouseWheel(controller, event)
+}
+exports.ViewReady = ViewReady
+
+function _Pan () {
+}
+inherits(_Pan, _State)
+
+var Pan = new _Pan()
+
+_Pan.prototype.start = function (controller) {
+    controller.application.mousePointer = controller.application.MoveMousePointer
+    controller.application.mousePressedX = mouseX
+    controller.application.mousePressedY = mouseY
+    controller.application.oldPanX = controller.application.panX
+    controller.application.oldPanY = controller.application.panY
+    controller.application.pointer_count_down = Math.floor(frameRate() / 2)
+}
+
+_Pan.prototype.end = function (controller) {
+    controller.application.mousePointer = controller.application.ArrowMousePointer
+}
+
+_Pan.prototype.mousePressed = function (controller) {
+    controller.application.mousePointer = controller.application.MoveMousePointer
+    controller.application.mousePressedX = mouseX
+    controller.application.mousePressedY = mouseY
+    controller.application.oldPanX = controller.application.panX
+    controller.application.oldPanY = controller.application.panY
+    controller.application.pointer_count_down = Math.floor(frameRate() / 2)
+}
+
+_Pan.prototype.mouseDragged = function (controller) {
+    controller.application.panX = (mouseX - controller.application.mousePressedX) + controller.application.oldPanX
+    controller.application.panY = (mouseY - controller.application.mousePressedY) + controller.application.oldPanY
+    controller.application.pointer_count_down = Math.floor(frameRate() / 2)
+}
+
+_Pan.prototype.mouseWheel = function (controller, event) {
+    controller.changeState(ViewReady)
+    controller.state.mouseWheel(controller, event)
+}
+
+_Pan.prototype.count_down_done = function (controller) {
+    controller.changeState(ViewReady)
+}
+exports.Pan = Pan
+
+
+function _Scale () {
+}
+inherits(_Scale, _State)
+
+_Scale.prototype.start = function (controller) {
+    controller.application.mousePointer = controller.application.MagnifyingGlassMousePointer
+}
+
+_Scale.prototype.end = function (controller) {
+    controller.application.mousePointer = controller.application.ArrowMousePointer
+}
+
+_Scale.prototype.mouseWheel = function (controller, event) {
     controller.application.mousePointer = controller.application.MagnifyingGlassMousePointer
     controller.application.pointer_count_down = Math.floor(frameRate() / 2)
     controller.application.scaleXY = controller.application.scaleXY + event.delta / 100
@@ -61,5 +128,13 @@ _ViewReady.prototype.mouseWheel = function (controller, event) {
         controller.application.scaleXY = 10
     }
 }
-exports.ViewReady = ViewReady
+_Scale.prototype.mouseDragged = function (controller) {
+    controller.changeState(ViewReady)
+    controller.state.mouseDragged(controller)
+}
+_Scale.prototype.count_down_done = function (controller) {
+    controller.changeState(ViewReady)
+}
 
+var Scale = new _Scale()
+exports.Scale = Scale

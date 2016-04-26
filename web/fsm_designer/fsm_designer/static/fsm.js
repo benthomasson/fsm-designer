@@ -269,6 +269,8 @@ _Ready.prototype.mousePressed = function (controller) {
         controller.changeState(Selected)
     } else if (controller.application.selected_transition != null) {
         controller.changeState(SelectedTransition)
+    } else {
+        controller.next_controller.state.mousePressed(controller.next_controller)
     }
 }
 

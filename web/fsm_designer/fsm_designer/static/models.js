@@ -522,6 +522,7 @@ Application.prototype.draw_menus = function (controller) {
     if (this.pointer_count_down === null) {
         // do nothing
     } else if (this.pointer_count_down <= 1) {
+        this.view_controller.state.count_down_done(this.view_controller)
         this.mousePointer = this.ArrowMousePointer
         this.pointer_count_down = null
     } else {
