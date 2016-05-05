@@ -1,51 +1,74 @@
 app: menu_fsm
+panX: 286
+panY: 211
+scaleXY: 1
 states:
-- label: MenuReady
+- label: Start
   size: 100
-  x: 510
-  y: 286
-- label: Save
-  size: 100
-  x: 737
-  y: 444
+  x: 160
+  y: -18
 - label: Load
   size: 100
-  x: 363
-  y: 457
-- label: NewTransition
-  size: 100
-  x: 306
-  y: 139
+  x: 438
+  y: 196
 - label: NewState
   size: 100
-  x: 684
-  y: 141
+  x: -71
+  y: 21
+- label: NewTransition
+  size: 100
+  x: -189
+  y: 396
+- label: ConnectTransition
+  size: 100
+  x: -197
+  y: 177
+- label: MenuReady
+  size: 100
+  x: 180
+  y: 207
+- label: Save
+  size: 100
+  x: 93
+  y: 486
+- label: Saved
+  size: 100
+  x: 337
+  y: 466
 transitions:
+- from_state: Start
+  label: start
+  to_state: MenuReady
+- from_state: Load
+  label: start
+  to_state: MenuReady
+- from_state: NewState
+  label: mousePressed
+  to_state: MenuReady
+- from_state: NewTransition
+  label: mousePressed
+  to_state: MenuReady
+- from_state: NewTransition
+  label: mousePressed
+  to_state: ConnectTransition
+- from_state: ConnectTransition
+  label: mousePressed
+  to_state: MenuReady
 - from_state: MenuReady
-  label: ''
+  label: new_state_button
+  to_state: NewState
+- from_state: MenuReady
+  label: load_button
+  to_state: Load
+- from_state: MenuReady
+  label: new_transition_button
+  to_state: NewTransition
+- from_state: MenuReady
+  label: save_button
   to_state: Save
 - from_state: Save
-  label: ''
+  label: on_saved
+  to_state: Saved
+- from_state: Saved
+  label: start
   to_state: MenuReady
-- from_state: MenuReady
-  label: ''
-  to_state: Load
-- from_state: Load
-  label: ''
-  to_state: MenuReady
-- from_state: MenuReady
-  label: ''
-  to_state: NewTransition
-- from_state: NewTransition
-  label: ''
-  to_state: MenuReady
-- from_state: MenuReady
-  label: ''
-  to_state: NewState
-- from_state: NewState
-  label: ''
-  to_state: MenuReady
-view:
-  panX: 0
-  panY: 0
-  scaleXY: 1

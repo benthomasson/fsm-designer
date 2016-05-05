@@ -38,13 +38,13 @@ var Start = new _Start()
 _Start.prototype.start = function (controller) {
     controller.changeState(MenuReady)
 }
+_Start.prototype.start.transitions = ['MenuReady']
 exports.Start = Start
 
 function _Load () {
 }
 inherits(_Load, _State)
 
-// transition to MenuReady
 _Load.prototype.start = function (controller) {
     window.open('/static/upload.html', '_self')
     controller.changeState(MenuReady)
@@ -80,7 +80,6 @@ function _NewTransition () {
 }
 inherits(_NewTransition, _State)
 
-// transition to MenuReady
 _NewTransition.prototype.start = function (controller) {
     controller.application.mousePointer = controller.application.NewTransitionPointer
 }
@@ -138,25 +137,21 @@ function _MenuReady () {
 }
 inherits(_MenuReady, _State)
 
-// transition to NewState
 _MenuReady.prototype.new_state_button = function (controller) {
     controller.changeState(NewState)
 }
 _MenuReady.prototype.new_state_button.transitions = ['NewState']
 
-// transition to Load
 _MenuReady.prototype.load_button = function (controller) {
     controller.changeState(Load)
 }
 _MenuReady.prototype.load_button.transitions = ['Load']
 
-// transition to NewTransition
 _MenuReady.prototype.new_transition_button = function (controller) {
     controller.changeState(NewTransition)
 }
 _MenuReady.prototype.new_transition_button.transitions = ['NewTransition']
 
-// transition to Save
 _MenuReady.prototype.save_button = function (controller) {
     controller.changeState(Save)
 }
@@ -214,7 +209,6 @@ function _Save () {
 }
 inherits(_Save, _State)
 
-// transition to MenuReady
 _Save.prototype.start = function (controller) {
     console.log(controller.application.exportFSM())
     controller.application.socket.emit('save', controller.application.exportFSM())
@@ -234,7 +228,6 @@ function _Saved () {
 }
 inherits(_Saved, _State)
 
-// transition to MenuReady
 _Saved.prototype.start = function (controller) {
     if (controller.application.last_saved_url != null) {
         window.open(controller.application.last_saved_url)

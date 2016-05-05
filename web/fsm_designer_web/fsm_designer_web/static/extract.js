@@ -54,7 +54,7 @@ for(i = 0; i < names.length; i++) {
             }
         }
     }
-    states.push({label: name})
+    states.push({label: name, size: 100, x:100, y:100})
 }
 data.app = app
 data.states = states
