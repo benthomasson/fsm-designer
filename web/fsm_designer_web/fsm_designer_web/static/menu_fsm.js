@@ -49,6 +49,7 @@ _Load.prototype.start = function (controller) {
     window.open('/static/upload.html', '_self')
     controller.changeState(MenuReady)
 }
+_Load.prototype.start.transitions = ['MenuReady']
 
 var Load = new _Load()
 exports.Load = Load
@@ -57,7 +58,6 @@ function _NewState () {
 }
 inherits(_NewState, _State)
 
-// transition to MenuReady
 _NewState.prototype.start = function (controller) {
     controller.application.mousePointer = controller.application.NewStatePointer
 }
@@ -71,6 +71,7 @@ _NewState.prototype.mousePressed = function (controller) {
     controller.application.states.push(new_state)
     controller.changeState(MenuReady)
 }
+_NewState.prototype.mousePressed.transitions = ['MenuReady']
 
 var NewState = new _NewState()
 exports.NewState = NewState
@@ -93,6 +94,7 @@ _NewTransition.prototype.mousePressed = function (controller) {
         controller.changeState(MenuReady)
     }
 }
+_NewTransition.prototype.mousePressed.transitions = ['MenuReady', 'ConnectTransition']
 
 var NewTransition = new _NewTransition()
 exports.NewTransition = NewTransition
@@ -127,6 +129,7 @@ _ConnectTransition.prototype.mousePressed = function (controller) {
         controller.changeState(MenuReady)
     }
 }
+_ConnectTransition.prototype.mousePressed.transitions = ['MenuReady']
 
 var ConnectTransition = new _ConnectTransition()
 exports.ConnectTransition = ConnectTransition
@@ -139,21 +142,25 @@ inherits(_MenuReady, _State)
 _MenuReady.prototype.new_state_button = function (controller) {
     controller.changeState(NewState)
 }
+_MenuReady.prototype.new_state_button.transitions = ['NewState']
 
 // transition to Load
 _MenuReady.prototype.load_button = function (controller) {
     controller.changeState(Load)
 }
+_MenuReady.prototype.load_button.transitions = ['Load']
 
 // transition to NewTransition
 _MenuReady.prototype.new_transition_button = function (controller) {
     controller.changeState(NewTransition)
 }
+_MenuReady.prototype.new_transition_button.transitions = ['NewTransition']
 
 // transition to Save
 _MenuReady.prototype.save_button = function (controller) {
     controller.changeState(Save)
 }
+_MenuReady.prototype.save_button.transitions = ['Save']
 
 _MenuReady.prototype.mousePressed = function (controller) {
     var widget = null
@@ -218,6 +225,7 @@ _Save.prototype.on_saved = function (controller, message) {
     controller.application.last_saved_url = message.url
     controller.changeState(Saved)
 }
+_Save.prototype.on_saved.transitions = ['Saved']
 
 var Save = new _Save()
 exports.Save = Save
@@ -234,6 +242,7 @@ _Saved.prototype.start = function (controller) {
     }
     controller.changeState(MenuReady)
 }
+_Saved.prototype.start.transitions = ['MenuReady']
 
 var Saved = new _Saved()
 exports.Saved = Saved

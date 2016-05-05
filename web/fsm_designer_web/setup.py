@@ -18,7 +18,7 @@ readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
-    name='fsm_designer',
+    name='fsm_designer_web',
     version='0.1.0',
     description='Design finite state machines in a web UI and generate code in a target language: python or javascript.',
     long_description=readme + '\n\n' + history,
@@ -26,9 +26,9 @@ setup(
     author_email='ben.thomasson@gmail.com',
     url='https://github.com/benthomasson/fsm_designer',
     packages=[
-        'fsm_designer',
+        'fsm_designer_web',
     ],
-    package_dir={'fsm_designer': 'fsm_designer'},
+    package_dir={'fsm_designer_web': 'fsm_designer_web'},
     include_package_data=True,
     install_requires=[
         'gevent',
@@ -38,13 +38,14 @@ setup(
         'psutil',
         'lockfile',
         'pidfile',
+        'jinja2',
     ],
     license="BSD",
     zip_safe=False,
-    keywords='fsm_designer',
+    keywords='fsm_designer_web',
     entry_points={
         'console_scripts': [
-            'fsm-designer = fsm_designer.cli:main',
+            'fsm-designer-web = fsm_designer_web.cli:main',
         ]
     },
     classifiers=[

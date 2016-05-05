@@ -14,7 +14,7 @@ import json
 from pprint import pprint
 from jinja2 import Environment, PackageLoader
 
-env = Environment(loader=PackageLoader('fsm_designer', 'templates'))
+env = Environment(loader=PackageLoader('fsm_designer_web', 'templates'))
 
 from bottle import route, request
 from bottle import static_file
@@ -101,7 +101,7 @@ def root(load_id):
 
 @route('/static/<filename:path>')
 def serve_static(filename):
-    return static_file(filename, root=pkg_resources.resource_filename('fsm_designer', 'static'))
+    return static_file(filename, root=pkg_resources.resource_filename('fsm_designer_web', 'static'))
 
 
 
