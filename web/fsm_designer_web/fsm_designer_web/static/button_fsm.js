@@ -38,10 +38,10 @@ function _NotPressed () {
 }
 inherits(_NotPressed, _State)
 
-// transition to Pressed
 _NotPressed.prototype.mousePressed = function (controller) {
     controller.changeState(Pressed)
 }
+_NotPressed.prototype.mousePressed.transitions = ['Pressed']
 
 var NotPressed = new _NotPressed()
 exports.NotPressed = NotPressed
@@ -50,13 +50,13 @@ function _Clicked () {
 }
 inherits(_Clicked, _State)
 
-// transition to NotPressed
 _Clicked.prototype.start = function (controller) {
     if (controller.call_back) {
         controller.call_back(controller)
     }
     controller.changeState(NotPressed)
 }
+_Clicked.prototype.start.transitions = ['NotPressed']
 
 var Clicked = new _Clicked()
 exports.Clicked = Clicked
@@ -72,15 +72,15 @@ _Pressed.prototype.end = function (controller) {
     controller.pressed = false
 }
 
-// transition to Clicked
 _Pressed.prototype.mouseReleased = function (controller) {
     controller.changeState(Clicked)
 }
+_Pressed.prototype.mouseReleased.transitions = ['Clicked']
 
-// transition to NotPressed
 _Pressed.prototype.mouseOut = function (controller) {
     controller.changeState(NotPressed)
 }
+_Pressed.prototype.mouseOut.transitions = ['NotPressed']
 
 var Pressed = new _Pressed()
 exports.Pressed = Pressed
