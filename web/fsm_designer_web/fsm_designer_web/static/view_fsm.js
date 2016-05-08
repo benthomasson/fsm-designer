@@ -41,6 +41,7 @@ var Start = new _Start()
 _Start.prototype.start = function (controller) {
     controller.changeState(ViewReady)
 }
+_Start.prototype.start.transitions = ['ViewReady']
 exports.Start = Start
 
 function _ViewReady () {
@@ -53,11 +54,13 @@ _ViewReady.prototype.mouseDragged = function (controller) {
     controller.changeState(Pan)
     controller.state.mouseDragged(controller)
 }
+_ViewReady.prototype.mouseDragged.transitions = ['Pan']
 
 _ViewReady.prototype.mouseWheel = function (controller, event) {
     controller.changeState(Scale)
     controller.state.mouseWheel(controller, event)
 }
+_ViewReady.prototype.mouseWheel.transitions = ['Scale']
 exports.ViewReady = ViewReady
 
 function _Pan () {
@@ -98,10 +101,12 @@ _Pan.prototype.mouseWheel = function (controller, event) {
     controller.changeState(ViewReady)
     controller.state.mouseWheel(controller, event)
 }
+_Pan.prototype.mouseWheel.transitions = ['ViewReady']
 
 _Pan.prototype.count_down_done = function (controller) {
     controller.changeState(ViewReady)
 }
+_Pan.prototype.count_down_done.transitions = ['ViewReady']
 exports.Pan = Pan
 
 function _Scale () {
@@ -134,9 +139,11 @@ _Scale.prototype.mouseDragged = function (controller) {
     controller.changeState(ViewReady)
     controller.state.mouseDragged(controller)
 }
+_Scale.prototype.mouseDragged.transitions = ['ViewReady']
 _Scale.prototype.count_down_done = function (controller) {
     controller.changeState(ViewReady)
 }
+_Scale.prototype.count_down_done.transitions = ['ViewReady']
 
 var Scale = new _Scale()
 exports.Scale = Scale
