@@ -174,10 +174,10 @@ FSMTransition.prototype.draw = function (controller) {
 exports.FSMTransition = FSMTransition
 
 function Application () {
-    var main_controller = this.main_controller = new fsm.Controller()
+    this.main_controller = new fsm.Controller()
     this.main_controller.application = this
     this.main_controller.changeState(fsm.Start)
-    var view_controller = this.view_controller = new view_fsm.Controller()
+    this.view_controller = new view_fsm.Controller()
     this.view_controller.application = this
     this.view_controller.changeState(view_fsm.Start)
     var menu_controller = this.menu_controller = new menu_fsm.Controller()
