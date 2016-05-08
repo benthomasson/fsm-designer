@@ -62,11 +62,14 @@ _ViewReady.prototype.mouseWheel = function (controller, event) {
 }
 _ViewReady.prototype.keyPressed = function (controller) {
     console.log(key)
-    if (key == 'D') {
+    if (key === 'D') {
         controller.application.debug = !controller.application.debug
     }
-    if (key == 'M') {
+    if (key === 'M') {
         controller.application.show_menu = !controller.application.show_menu
+    }
+    if (key === 'P') {
+        controller.application.show_pointer = !controller.application.show_pointer
     }
 }
 _ViewReady.prototype.mouseWheel.transitions = ['Scale']

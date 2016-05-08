@@ -159,14 +159,16 @@ _MenuReady.prototype.save_button.transitions = ['Save']
 
 _MenuReady.prototype.mousePressed = function (controller) {
     var widget = null
-    for (var i = 0; i < controller.application.active_widgets.length; i++) {
-        widget = controller.application.active_widgets[i]
-        if (mouseX > widget.left_extent() &&
-                mouseX < widget.right_extent() &&
-                mouseY > widget.top_extent() &&
-                mouseY < widget.bottom_extent()) {
-            widget.mousePressed()
-            return
+    if (controller.application.show_menu) {
+        for (var i = 0; i < controller.application.active_widgets.length; i++) {
+            widget = controller.application.active_widgets[i]
+            if (mouseX > widget.left_extent() &&
+                    mouseX < widget.right_extent() &&
+                    mouseY > widget.top_extent() &&
+                    mouseY < widget.bottom_extent()) {
+                widget.mousePressed()
+                return
+            }
         }
     }
     controller.next_controller.state.mousePressed(controller.next_controller)
@@ -174,13 +176,15 @@ _MenuReady.prototype.mousePressed = function (controller) {
 
 _MenuReady.prototype.mouseReleased = function (controller) {
     var widget = null
-    for (var i = 0; i < controller.application.active_widgets.length; i++) {
-        widget = controller.application.active_widgets[i]
-        if (mouseX > widget.left_extent() &&
-                mouseX < widget.right_extent() &&
-                mouseY > widget.top_extent() &&
-                mouseY < widget.bottom_extent()) {
-            widget.mouseReleased()
+    if (controller.application.show_menu) {
+        for (var i = 0; i < controller.application.active_widgets.length; i++) {
+            widget = controller.application.active_widgets[i]
+            if (mouseX > widget.left_extent() &&
+                    mouseX < widget.right_extent() &&
+                    mouseY > widget.top_extent() &&
+                    mouseY < widget.bottom_extent()) {
+                widget.mouseReleased()
+            }
         }
     }
     controller.next_controller.state.mouseReleased(controller.next_controller)

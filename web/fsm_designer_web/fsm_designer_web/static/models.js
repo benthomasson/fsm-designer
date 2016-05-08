@@ -203,8 +203,9 @@ function Application () {
     this.selected_state = null
     this.selected_transition = null
     this.selected_property = null
-    this.debug = true
+    this.debug = false
     this.show_menu = true
+    this.show_pointer = true
     this.active_widgets = []
     this.properties = []
     this.model = null
@@ -532,7 +533,7 @@ Application.prototype.draw_menus = function (controller) {
         this.pointer_count_down -= 1
     }
 
-    if (this.mousePointer) {
+    if (this.mousePointer && this.show_pointer) {
         this.mousePointer.draw(this)
     }
 
