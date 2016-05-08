@@ -204,6 +204,7 @@ function Application () {
     this.selected_transition = null
     this.selected_property = null
     this.debug = true
+    this.show_menu = true
     this.active_widgets = []
     this.properties = []
     this.model = null
@@ -498,8 +499,10 @@ Application.prototype.draw_content = function (controller) {
 }
 
 Application.prototype.draw_menus = function (controller) {
-    this.bar.draw(controller)
-    this.app_property_field.draw(controller)
+    if (this.show_menu) {
+        this.bar.draw(controller)
+        this.app_property_field.draw(controller)
+    }
     if (this.debug) {
         var from_right = 20
         noStroke()
@@ -535,16 +538,18 @@ Application.prototype.draw_menus = function (controller) {
 
     var widget = null
 
-    for (var i = 0; i < controller.active_widgets.length; i++) {
-        widget = controller.active_widgets[i]
-        if (mouseX > widget.left_extent() &&
-                mouseX < widget.right_extent() &&
-                mouseY > widget.top_extent() &&
-                mouseY < widget.bottom_extent()) {
-            widget.mouseOver()
-        } else {
-            widget.mouseOut()
-            widget.mouseReleased()
+    if (this.show_menu) {
+        for (var i = 0; i < controller.active_widgets.length; i++) {
+            widget = controller.active_widgets[i]
+            if (mouseX > widget.left_extent() &&
+                    mouseX < widget.right_extent() &&
+                    mouseY > widget.top_extent() &&
+                    mouseY < widget.bottom_extent()) {
+                widget.mouseOver()
+            } else {
+                widget.mouseOut()
+                widget.mouseReleased()
+            }
         }
     }
 }

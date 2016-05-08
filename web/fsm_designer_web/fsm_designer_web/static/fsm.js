@@ -32,6 +32,7 @@ _State.prototype.mouseReleased = function (controller) {
 _State.prototype.keyTyped = function (controller) {
 }
 _State.prototype.keyPressed = function (controller) {
+    controller.next_controller.state.keyPressed(controller)
 }
 _State.prototype.keyReleased = function (controller) {
 }
