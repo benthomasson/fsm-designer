@@ -1,0 +1,10 @@
+app: x
+panX: 0
+panY: 0
+scaleXY: 1
+states:
+- label: X
+  size: 100
+  x: 640
+  y: 328
+transitions: []

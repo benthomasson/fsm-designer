@@ -5,6 +5,7 @@ Usage:
     fsm-designer [options] generate-js <fsm-design> <output-module>
     fsm-designer [options] validate <fsm-design> <module>
     fsm-designer [options] extract <module> <output-fsm-design>
+    fsm-designer [options] diff <a> <b>
 
 Generate and validate an FSM implementation based on a FSM diagram.
 
@@ -21,7 +22,7 @@ import os
 import sys
 import yaml
 
-from fsm import validate_design, generate_code, to_yaml
+from fsm import validate_design, generate_code, to_yaml, diff
 
 import logging
 logger = logging.getLogger('fsm_designer.cli')
@@ -74,6 +75,33 @@ def extract(module_name, output_fsm_design):
         f.write(to_yaml(module))
 
 
+def diff_yaml(a_file, b_file):
+    with open(a_file) as af:
+        a = yaml.load(af.read())
+    with open(b_file) as bf:
+        b = yaml.load(bf.read())
+    missing_states, missing_transitions = diff(a or {}, b or {})
+    return_value = 0
+    if missing_states:
+        print "Extra states in", a_file
+        print "\n".join(list(missing_states))
+        return_value = 1
+    if missing_transitions:
+        print "Extra transitions in", a_file
+        print missing_transitions
+        return_value = 1
+    missing_states, missing_transitions = diff(b or {}, a or {})
+    if missing_states:
+        print "Extra states in", b_file
+        print "\n".join(list(missing_states))
+        return_value = 1
+    if missing_transitions:
+        print "Extra transitions in", b_file
+        print missing_transitions
+        return_value = 1
+    return return_value
+
+
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
@@ -99,5 +127,7 @@ def main(args=None):
             return 0
         else:
             return 1
+    elif parsed_args['diff']:
+        return diff_yaml(parsed_args['<a>'], parsed_args['<b>'])
     elif parsed_args['extract']:
         extract(parsed_args['<module>'], parsed_args['<output-fsm-design>'])

@@ -460,6 +460,16 @@ Application.prototype.select_property = function () {
     return false
 }
 
+Application.prototype.unselect_transition = function () {
+    this.selected_transition = null
+    var i = 0
+    var transition = null
+    for (i = 0; i < this.transitions.length; i++) {
+        transition = this.transitions[i]
+        transition.selected = false
+    }
+}
+
 Application.prototype.select_transition = function () {
     this.selected_transition = null
     var i = 0

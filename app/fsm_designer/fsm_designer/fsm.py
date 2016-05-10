@@ -43,6 +43,10 @@ def to_yaml(module, name=None, state_base_class_name='State'):
 
 def validate_design(design, module, name=None, state_base_class_name='State'):
     actual = to_fsm_dict(module, name, state_base_class_name)
+    return diff(design, actual, name, state_base_class_name)
+
+
+def diff(design, actual, name=None, state_base_class_name='State'):
     design_states = set([s.get('label', '') for s in design.get('states', [])])
     logger.debug("design_states %s", design_states)
     actual_states = set([s.get('label', '') for s in actual.get('states', [])])

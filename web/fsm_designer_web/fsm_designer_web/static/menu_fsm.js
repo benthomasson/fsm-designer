@@ -108,6 +108,7 @@ _ConnectTransition.prototype.start = function (controller) {
     new_transition.from_state = controller.application.selected_state
     controller.application.selected_state.selected = false
     controller.application.selected_state = null
+    controller.application.unselect_transition()
     controller.application.selected_transition = new_transition
     controller.application.transitions.push(new_transition)
 }

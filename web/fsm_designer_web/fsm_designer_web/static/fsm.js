@@ -45,7 +45,8 @@ function _SelectedTransition () {
 inherits(_SelectedTransition, _State)
 
 _SelectedTransition.prototype.mousePressed = function (controller) {
-    if (controller.application.selected_transition.is_selected(controller.application)) {
+    if (controller.application.selected_transition &&
+        controller.application.selected_transition.is_selected(controller.application)) {
         controller.changeState(EditTransition)
     } else {
         controller.changeState(Ready)
