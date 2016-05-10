@@ -38,6 +38,7 @@ setup(
         'psutil',
         'lockfile',
         'pidfile',
+        'pyyaml',
         'jinja2',
     ],
     license="BSD",
