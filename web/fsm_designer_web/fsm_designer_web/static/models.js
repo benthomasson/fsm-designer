@@ -20,15 +20,16 @@ FSMState.prototype.exportState = function () {
             size: this.size}
 }
 FSMState.prototype.draw = function (controller) {
-    stroke(settings.COLOR)
-    fill(settings.FILL)
-    ellipse(this.x, this.y, this.size, this.size)
+    this.size = max(this.size, textWidth(this.label + "_"))
     if (this.selected) {
         strokeWeight(2)
         stroke(settings.SELECTED_COLOR)
         fill(settings.FILL)
         ellipse(this.x, this.y, this.size + 6, this.size + 6)
     }
+    stroke(settings.COLOR)
+    fill(settings.FILL)
+    ellipse(this.x, this.y, this.size, this.size)
     noStroke()
     fill(settings.COLOR)
     textSize(settings.TEXT_SIZE)
