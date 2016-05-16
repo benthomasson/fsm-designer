@@ -13,6 +13,7 @@ Options:
     -h, --help          Show this page
     -v, --verbose       Enable verbose logging
     -d, --debug         Enable debug logging
+    --template=<t>      Template to use
 '''
 
 
@@ -23,6 +24,8 @@ import sys
 import yaml
 
 from fsm import validate_design, generate_code, to_yaml, diff
+from jinja2 import Environment, PackageLoader, FileSystemLoader
+from conf import settings
 
 import logging
 logger = logging.getLogger('fsm_designer.cli')
@@ -37,11 +40,11 @@ class Module(object):
         self.__name__ = name
 
 
-def generate(code_template, fsm_design, output_module):
+def generate(template, fsm_design, output_module):
     module_name = os.path.splitext(os.path.basename(output_module))[0]
     with open(fsm_design) as f:
         missing_states, missing_transitions = validate_design(yaml.load(f.read()), Module(module_name))
-    code = generate_code(code_template, missing_states, missing_transitions)
+    code = generate_code(template, missing_states, missing_transitions)
     with open(output_module, 'w') as f:
         f.write(code)
 
@@ -117,11 +120,22 @@ def main(args=None):
         logging.basicConfig(level=logging.WARN)
     logger.debug("sys.argv %s", sys.argv)
     logger.debug("parsed_args %s", parsed_args)
-
     if parsed_args['generate-py']:
-        generate("fsm.pyt", parsed_args['<fsm-design>'], parsed_args['<output-module>'])
+        if parsed_args['--template']:
+            env = Environment(loader=FileSystemLoader("."))
+            template = env.get_template(parsed_args['--template'])
+        else:
+            env = Environment(loader=PackageLoader(*settings.TEMPLATES_PATH))
+            template = env.get_template("fsm.pyt")
+        generate(template, parsed_args['<fsm-design>'], parsed_args['<output-module>'])
     if parsed_args['generate-js']:
-        generate("fsm.jst", parsed_args['<fsm-design>'], parsed_args['<output-module>'])
+        if parsed_args['--template']:
+            env = Environment(loader=FileSystemLoader("."))
+            template = env.get_template(parsed_args['--template'])
+        else:
+            env = Environment(loader=PackageLoader(*settings.TEMPLATES_PATH))
+            template = env.get_template("fsm.jst")
+        generate(template, parsed_args['<fsm-design>'], parsed_args['<output-module>'])
     elif parsed_args['validate']:
         if validate(parsed_args['<fsm-design>'], parsed_args['<module>']):
             return 0

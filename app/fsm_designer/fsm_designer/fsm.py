@@ -62,10 +62,8 @@ def diff(design, actual, name=None, state_base_class_name='State'):
     return missing_states, missing_transitions
 
 
-def generate_code(code_template, missing_states, missing_transitions):
+def generate_code(template, missing_states, missing_transitions):
 
-    env = Environment(loader=PackageLoader(*settings.TEMPLATES_PATH))
-    template = env.get_template(code_template)
 
     states = []
     missing_transitions_copy = missing_transitions.copy()
