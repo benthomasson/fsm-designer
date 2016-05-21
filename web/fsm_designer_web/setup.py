@@ -31,7 +31,7 @@ setup(
     package_dir={'fsm_designer_web': 'fsm_designer_web'},
     include_package_data=True,
     install_requires=[
-        'gevent',
+        'gevent==1.1b4',
         'bottle',
         'docopt',
         'python-daemon',
