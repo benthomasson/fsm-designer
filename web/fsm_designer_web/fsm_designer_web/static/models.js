@@ -20,6 +20,7 @@ FSMState.prototype.exportState = function () {
             size: this.size}
 }
 FSMState.prototype.draw = function (controller) {
+    textSize(settings.TEXT_SIZE)
     this.size = max(this.size, textWidth(this.label + "_"))
     if (this.selected) {
         strokeWeight(2)
