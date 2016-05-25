@@ -29,12 +29,12 @@ exports._State = _State
 function _{{state}} () {
 }
 inherits(_{{state}}, _State)
-{%for f_name, transitions in functions %}{%for t in transitions%}
-// transition to {{t.to_state}}{%endfor%}
+{%for f_name, transitions in functions %}
 _{{state}}.prototype.{{f_name}} = function (controller) {
 {%for t in transitions%}
     controller.changeState({{t.to_state}})
 {%endfor%}}
+_{{state}}.prototype.{{f_name}}.transitions = [{%for t in transitions%}'{{t.to_state}}'{% if not loop.last%}, {%endif%}{%endfor%}]
 {%endfor%}
 var {{state}} = new _{{state}}()
 exports.{{state}} = {{state}}
