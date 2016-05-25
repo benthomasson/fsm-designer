@@ -85,13 +85,17 @@ def diff_yaml(a_file, b_file):
         b = yaml.load(bf.read())
     missing_states, missing_transitions = diff(a or {}, b or {})
     return_value = 0
+    def print_transitions(transitions):
+        for t in list(transitions):
+            t = dict(t)
+            print 'On', t['label'], ':', t['from_state'], '->', t['to_state']
     if missing_states:
         print "Extra states in", a_file
         print "\n".join(list(missing_states))
         return_value = 1
     if missing_transitions:
         print "Extra transitions in", a_file
-        print missing_transitions
+        print_transitions(missing_transitions)
         return_value = 1
     missing_states, missing_transitions = diff(b or {}, a or {})
     if missing_states:
@@ -100,7 +104,7 @@ def diff_yaml(a_file, b_file):
         return_value = 1
     if missing_transitions:
         print "Extra transitions in", b_file
-        print missing_transitions
+        print_transitions(missing_transitions)
         return_value = 1
     return return_value
 
