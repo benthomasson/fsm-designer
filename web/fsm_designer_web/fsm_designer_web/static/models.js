@@ -189,7 +189,7 @@ function Application () {
     this.main_controller.next_controller = this.view_controller
     this.fsm_to_load = null
     this.socket = null
-    this.states = []
+    this.tables = []
     this.transitions = []
     this.panX = 0
     this.panY = 0

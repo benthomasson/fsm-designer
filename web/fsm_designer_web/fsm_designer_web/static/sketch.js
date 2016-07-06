@@ -87,7 +87,7 @@ function keyPressed () {
     } catch (err) {
         console.log(err)
     }
-    // Prevent Chrome from using backspace for go to the last page.
+    // Prevent Chrome from using backspace to go to the last page.
     if (keyCode === BACKSPACE) {
         return false
     }
