@@ -1,4 +1,3 @@
-# Copyright 2015 Cumulus Networks, Inc.
 
 from gevent import monkey
 monkey.patch_all()
