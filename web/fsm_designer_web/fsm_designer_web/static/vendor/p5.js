@@ -11785,8 +11785,7 @@ var p5 = function(sketch, node, sync) {
 
   }.bind(this);
 
-  this._draw = function () {
-    var now = window.performance.now();
+  this._draw = function (now) {
     var time_since_last = now - this._lastFrameTime;
     var target_time_between_frames = 1000 / this._targetFrameRate;
 
